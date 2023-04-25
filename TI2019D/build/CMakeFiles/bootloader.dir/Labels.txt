@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/CMakeFiles/bootloader
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/CMakeFiles/bootloader.rule
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/CMakeFiles/bootloader-complete.rule
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule

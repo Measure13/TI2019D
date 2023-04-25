@@ -1,0 +1,7 @@
+source "D:/Hardware/Espressif/frameworks/esp-idf/components/bootloader/Kconfig.projbuild"
+source "D:/Hardware/Espressif/frameworks/esp-idf/components/esp_app_format/Kconfig.projbuild"
+source "D:/Hardware/Espressif/frameworks/esp-idf/components/esp_rom/Kconfig.projbuild"
+source "D:/Hardware/Espressif/frameworks/esp-idf/components/esptool_py/Kconfig.projbuild"
+source "D:/Hardware/Espressif/frameworks/esp-idf/components/partition_table/Kconfig.projbuild"
+source "D:/Hardware/Espressif/esp-rainmaker/components/esp_rainmaker/Kconfig.projbuild"
+source "D:/Hardware/Espressif/esp-rainmaker/examples/common/app_wifi/Kconfig.projbuild"

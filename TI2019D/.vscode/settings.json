@@ -1,0 +1,18 @@
+{
+  "C_Cpp.intelliSenseEngine": "Tag Parser",
+  "idf.portWin": "COM6",
+  "idf.adapterTargetName": "esp32",
+  "files.associations": {
+    "*.m": "matlab",
+    "*.asm": "asm-collection",
+    "spi_ad8933.h": "c",
+    "esp_rmaker_standard_types.h": "c",
+    "esp_rmaker_core.h": "c",
+    "esp_rmaker_console.h": "c",
+    "esp_rmaker_common_events.h": "c",
+    "esp_rmaker_factory.h": "c",
+    "esp_rmaker_common_console.h": "c",
+    "rainmaker.h": "c",
+    "spi_ad9833.h": "c"
+  }
+}
