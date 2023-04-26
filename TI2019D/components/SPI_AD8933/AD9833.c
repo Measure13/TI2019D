@@ -10,7 +10,6 @@
 #include "AD9833.h"
 
 static uint16_t isc = 0x0000;//instruction
-// static esp_err_t ret;
 static const char* TAG = "AD9833";
 
 void AD9833_Reset(void)

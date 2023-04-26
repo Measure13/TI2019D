@@ -14,7 +14,7 @@ void app_main(void)
 {
     ESP_LOGI(TAG, "Start!");
     ref_freq = 25 *1000 * 1000;
-    output_freq = 4000;
+    output_freq = 400;
     SPI_Init();
     AD9833_Default_Set(output_freq, ref_freq);
 
