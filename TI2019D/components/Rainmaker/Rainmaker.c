@@ -56,10 +56,16 @@ static esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_pa
         ESP_LOGI(TAG, "Received value = %s for %s - %s",
                 val.val.s, esp_rmaker_device_get_name(device),
                 esp_rmaker_param_get_name(param));
-        driver_info.freq_coarse = val.val.s;
+        for (int i = 0 ; i < 3 ; ++i)
+        {
+            if (strcmp(freq_units[i], val.val.s) == 0)
+            {
+                driver_info.freq_coarse = freq_units[i];
+                break;
+            }
+        }
     }
     esp_rmaker_param_update_and_report(param, val);
-    // app_driver_set_state(driver_info);
     return ESP_OK;
 }
 /* Event handler for catching RainMaker events */

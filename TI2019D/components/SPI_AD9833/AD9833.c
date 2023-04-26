@@ -25,6 +25,11 @@ void AD9833_Set_Freq(uint32_t output_freq)
     ZERO(isc);
     uint32_t delta_phase = (uint32_t)((double)output_freq * phase_all / ref_freq + 0.5);
     // ESP_LOGI(TAG, "delta phase:%lu", delta_phase); // less than 268435455, or 0xfff ffff
+    if (delta_phase > (phase_all - 1) || delta_phase < 1)
+    {
+        ESP_LOGE(TAG, "delta phase too large:%lu, rectified to %lu.", delta_phase, phase_all - 2);
+        delta_phase = phase_all - 2;
+    }
     isc = (uint16_t)(delta_phase & 0x00003fff); // LSB 14
     AD_FREQ_1(isc);
     SPI_Transmit(isc);

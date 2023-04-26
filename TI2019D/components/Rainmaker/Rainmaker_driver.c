@@ -25,13 +25,12 @@ app_driver_info app_driver_get_state(void)
 
 void app_driver_SPI(void *pvParameter)
 {
+    int i;
     uint32_t factor = 1;
     while (1)
     {
-        ESP_LOGI(APP_SPI_TAG, "waiting...");
         xQueueReceive(xQueue, &(driver_info.power_state), portMAX_DELAY);
-        ESP_LOGI(APP_SPI_TAG, "get one task!");
-        for (int i = 0; i < 3; ++i)
+        for (i = 0; i < 3; ++i)
         {
             if (strcmp(freq_units[i], driver_info.freq_coarse) == 0)
             {
@@ -42,6 +41,7 @@ void app_driver_SPI(void *pvParameter)
         }
         driver_info.power_state = false;
         xQueueSend(xQueue, &(driver_info.power_state), portMAX_DELAY);
+        ESP_LOGI(APP_SPI_TAG, "freq:%lu%s", driver_info.freq_fine, freq_units[i]);
         vTaskDelete(NULL);
     }
 }
