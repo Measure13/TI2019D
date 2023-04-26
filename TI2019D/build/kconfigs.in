@@ -54,5 +54,5 @@ source "D:/Hardware/Espressif/esp-rainmaker/components/esp-insights/components/r
 source "D:/Hardware/Espressif/esp-rainmaker/components/gpio_button/Kconfig"
 source "D:/Hardware/Espressif/esp-rainmaker/components/ws2812_led/Kconfig"
 source "D:/Hardware/Espressif/esp-rainmaker/examples/common/app_insights/Kconfig"
-source "D:/MyWorks/Programs/Github/TI2019D/TI2019D/managed_components/espressif__esp_secure_cert_mgr/Kconfig"
 source "D:/MyWorks/Programs/Github/TI2019D/TI2019D/managed_components/espressif__mdns/Kconfig"
+source "D:/MyWorks/Programs/Github/TI2019D/TI2019D/managed_components/espressif__esp_secure_cert_mgr/Kconfig"

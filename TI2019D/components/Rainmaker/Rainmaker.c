@@ -40,22 +40,24 @@ static esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_pa
                 val.val.b? "true" : "false", esp_rmaker_device_get_name(device),
                 esp_rmaker_param_get_name(param));
         // app_driver_set_state(val.val.b);
+        driver_info.power_state = val.val.b;
         esp_rmaker_param_update_and_report(param, val);
     }
     else if (strcmp(esp_rmaker_param_get_name(param), freq_fine_param_name) == 0) {
-        ESP_LOGI(TAG, "Received value = %1f for %s - %s",
-                val.val.f, esp_rmaker_device_get_name(device),
+        ESP_LOGI(TAG, "Received value = %d for %s - %s",
+                val.val.i, esp_rmaker_device_get_name(device),
                 esp_rmaker_param_get_name(param));
-        // app_driver_set_state(val.val.b);
+         driver_info.freq_fine = val.val.i;
         esp_rmaker_param_update_and_report(param, val);
     }
     else if (strcmp(esp_rmaker_param_get_name(param), freq_coarse_param_name) == 0) {
         ESP_LOGI(TAG, "Received value = %s for %s - %s",
                 val.val.s, esp_rmaker_device_get_name(device),
                 esp_rmaker_param_get_name(param));
-        // app_driver_set_state(val.val.b);
+        driver_info.freq_coarse = val.val.s;
         esp_rmaker_param_update_and_report(param, val);
     }
+    app_driver_set_state(driver_info);
     return ESP_OK;
 }
 /* Event handler for catching RainMaker events */
@@ -157,7 +159,7 @@ void Rainmaker_Init(void)
      * set initial state.
      */
     esp_rmaker_console_init();
-    // app_driver_init();
+    app_driver_init();
     // app_driver_set_state(DEFAULT_POWER);
 
     /* Initialize NVS. */
@@ -215,10 +217,10 @@ void Rainmaker_Init(void)
     esp_rmaker_device_add_param(rainmaker_device, power_param);
 
     esp_rmaker_param_t *fine_part_param = esp_rmaker_param_create(freq_fine_param_name, NULL,
-            esp_rmaker_float(400.0), PROP_FLAG_READ | PROP_FLAG_WRITE);
+            esp_rmaker_int(400), PROP_FLAG_READ | PROP_FLAG_WRITE);
     if (fine_part_param) {
         esp_rmaker_param_add_ui_type(fine_part_param, ESP_RMAKER_UI_SLIDER);
-        esp_rmaker_param_add_bounds(fine_part_param, esp_rmaker_float(0.0f), esp_rmaker_float(1000.0f), esp_rmaker_float(0.1));
+        esp_rmaker_param_add_bounds(fine_part_param, esp_rmaker_int(0), esp_rmaker_int(1000), esp_rmaker_int(1));
         esp_rmaker_device_add_param(rainmaker_device, fine_part_param);
     }
     else

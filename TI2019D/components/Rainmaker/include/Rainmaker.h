@@ -11,10 +11,21 @@
 #include <esp_rmaker_core.h>
 
 #define DEFAULT_POWER  true
-#define DEVICE_NAME     "Switch"
-#define DEVICE_TYPE     "esp.device.switch"
+#define DEVICE_NAME     "Test"
+#define DEVICE_TYPE     "esp.device.test"
+
+typedef struct
+{
+   bool power_state;
+   uint32_t freq_fine;
+   char* freq_coarse;
+}app_driver_info;
+
 extern esp_rmaker_device_t *rainmaker_device;
-// void app_driver_init(void);
-// int app_driver_set_state(bool state);
-// bool app_driver_get_state(void);
+extern const char * freq_units[];
+extern app_driver_info driver_info;
+
+void app_driver_init(void);
+void app_driver_set_state(app_driver_info di);
+app_driver_info app_driver_get_state(void);
 void Rainmaker_Init(void);
