@@ -8,19 +8,15 @@
 static const char* TAG = "main";
 
 static uint32_t ref_freq;
-static uint32_t out_freq;
+static uint32_t output_freq;
 
 void app_main(void)
 {
     ESP_LOGI(TAG, "Start!");
     ref_freq = 25 *1000 * 1000;
-    out_freq = 400;
-    // SPI_Init();
+    output_freq = 4000;
+    SPI_Init();
+    AD9833_Default_Set(output_freq, ref_freq);
 
-    // AD9833_Reset();
-    // AD9833_Set_Freq(out_freq, ref_freq);
-    // AD9833_Set_Phase(0);
-    // AD9833_Set();
-    // AD9833_Set_Freq(out_freq, ref_freq);
-    Rainmaker_Init();
+    // Rainmaker_Init();
 }

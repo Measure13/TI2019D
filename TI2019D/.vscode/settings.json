@@ -13,6 +13,7 @@
     "esp_rmaker_factory.h": "c",
     "esp_rmaker_common_console.h": "c",
     "rainmaker.h": "c",
-    "spi_ad9833.h": "c"
+    "spi_ad9833.h": "c",
+    "spi_hardware.h": "c"
   }
 }

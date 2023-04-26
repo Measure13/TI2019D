@@ -40,7 +40,7 @@ static esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_pa
                 val.val.b? "true" : "false", esp_rmaker_device_get_name(device),
                 esp_rmaker_param_get_name(param));
         // app_driver_set_state(val.val.b);
-        driver_info.power_state = val.val.b;
+        driver_info.power_state = true;
         esp_rmaker_param_update_and_report(param, val);
     }
     else if (strcmp(esp_rmaker_param_get_name(param), freq_fine_param_name) == 0) {

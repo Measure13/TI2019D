@@ -19,3 +19,5 @@
 #define SCLK_0()            gpio_set_level(SCLK, 0)
 #define MOSI_1()            gpio_set_level(MOSI, 1)
 #define MOSI_0()            gpio_set_level(MOSI, 0)
+
+#define AD9833_Delay()      do{uint16_t i = 0; for (i = 0; i < 8; i ++);} while (false)

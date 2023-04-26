@@ -18,24 +18,31 @@ void SPI_Init(void)
     };
     gpio_config(&gpio_cfg);
 
-    CS_1();
+    CS_1();// CS_0();
     FSYNC_1();
     SCLK_0();
 }
 
-void SPI_Transmit(uint16_t* content)
+void SPI_Transmit(uint16_t content)
 {
-    uint16_t mask = 1;
+    ESP_LOGI("HSPI", "ctt:%x", content);
     SCLK_1();
+    FSYNC_1();
     FSYNC_0();
     CS_0();
-    for (int i = 15; i >= 0;--i)
-    {
+    for(int i = 0; i < 16; i++)
+	{
         SCLK_1();
-        if (((0x01 << mask) & (*content)))MOSI_1();
-        else MOSI_0();
-        SCLK_0();
-    }
+		if (content & 0x8000)
+			MOSI_1();
+		else
+			MOSI_0();
+		
+		AD9833_Delay();
+		SCLK_0();
+		AD9833_Delay();
+        content <<= 1;
+	}
     FSYNC_1();
     CS_1();
 }
