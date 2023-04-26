@@ -8,9 +8,12 @@
 #pragma once
 #include <stdint.h>
 #include <stdbool.h>
+#include <esp_rmaker_core.h>
 
 #define DEFAULT_POWER  true
-extern esp_rmaker_device_t *switch_device;
+#define DEVICE_NAME     "Switch"
+#define DEVICE_TYPE     "esp.device.switch"
+extern esp_rmaker_device_t *rainmaker_device;
 // void app_driver_init(void);
 // int app_driver_set_state(bool state);
 // bool app_driver_get_state(void);

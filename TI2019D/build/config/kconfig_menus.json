@@ -23146,6 +23146,34 @@
                 "children": [
                     {
                         "children": [],
+                        "depends_on": "!IDF_TARGET_ESP32 && !IDF_TARGET_ESP32C2",
+                        "help": "Enable the DS peripheral support. Not supported on esp32 and esp32c2.",
+                        "id": "ESP_SECURE_CERT_DS_PERIPHERAL",
+                        "name": "ESP_SECURE_CERT_DS_PERIPHERAL",
+                        "range": null,
+                        "title": "Enable DS peripheral support",
+                        "type": "bool"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": null,
+                        "help": "This option enables support for the legacy formats along with\nthe current format in the esp_secure_cert component.\nThe current format is\ncust_flash_tlv\nThe legacy formats are as follows:\ncust_flash\nnvs",
+                        "id": "ESP_SECURE_CERT_SUPPORT_LEGACY_FORMATS",
+                        "name": "ESP_SECURE_CERT_SUPPORT_LEGACY_FORMATS",
+                        "range": null,
+                        "title": "Enable support for legacy formats",
+                        "type": "bool"
+                    }
+                ],
+                "depends_on": null,
+                "id": "component-config-esp-secure-cert-manager",
+                "title": "ESP Secure Cert Manager",
+                "type": "menu"
+            },
+            {
+                "children": [
+                    {
+                        "children": [],
                         "depends_on": null,
                         "help": "Number of network interfaces to be served by the mDNS library.\nLowering this number helps to reduce some static RAM usage.",
                         "id": "MDNS_MAX_INTERFACES",
@@ -23361,34 +23389,6 @@
                 "depends_on": null,
                 "id": "component-config-mdns",
                 "title": "mDNS",
-                "type": "menu"
-            },
-            {
-                "children": [
-                    {
-                        "children": [],
-                        "depends_on": "!IDF_TARGET_ESP32 && !IDF_TARGET_ESP32C2",
-                        "help": "Enable the DS peripheral support. Not supported on esp32 and esp32c2.",
-                        "id": "ESP_SECURE_CERT_DS_PERIPHERAL",
-                        "name": "ESP_SECURE_CERT_DS_PERIPHERAL",
-                        "range": null,
-                        "title": "Enable DS peripheral support",
-                        "type": "bool"
-                    },
-                    {
-                        "children": [],
-                        "depends_on": null,
-                        "help": "This option enables support for the legacy formats along with\nthe current format in the esp_secure_cert component.\nThe current format is\ncust_flash_tlv\nThe legacy formats are as follows:\ncust_flash\nnvs",
-                        "id": "ESP_SECURE_CERT_SUPPORT_LEGACY_FORMATS",
-                        "name": "ESP_SECURE_CERT_SUPPORT_LEGACY_FORMATS",
-                        "range": null,
-                        "title": "Enable support for legacy formats",
-                        "type": "bool"
-                    }
-                ],
-                "depends_on": null,
-                "id": "component-config-esp-secure-cert-manager",
-                "title": "ESP Secure Cert Manager",
                 "type": "menu"
             }
         ],

@@ -22,7 +22,11 @@
 #include "Rainmaker.h"
 
 static const char *TAG = "rainmaker";
-esp_rmaker_device_t *switch_device;
+// static const char* freq_param_name = "Freq";
+#define freq_fine_param_name "Freq"
+#define freq_coarse_param_name "Unit"
+const char * freq_units[] = {"Hz", "kHz", "MHz"};
+esp_rmaker_device_t *rainmaker_device;
 
 /* Callback to handle commands received from the RainMaker cloud */
 static esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_param_t *param,
@@ -34,6 +38,20 @@ static esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_pa
     if (strcmp(esp_rmaker_param_get_name(param), ESP_RMAKER_DEF_POWER_NAME) == 0) {
         ESP_LOGI(TAG, "Received value = %s for %s - %s",
                 val.val.b? "true" : "false", esp_rmaker_device_get_name(device),
+                esp_rmaker_param_get_name(param));
+        // app_driver_set_state(val.val.b);
+        esp_rmaker_param_update_and_report(param, val);
+    }
+    else if (strcmp(esp_rmaker_param_get_name(param), freq_fine_param_name) == 0) {
+        ESP_LOGI(TAG, "Received value = %1f for %s - %s",
+                val.val.f, esp_rmaker_device_get_name(device),
+                esp_rmaker_param_get_name(param));
+        // app_driver_set_state(val.val.b);
+        esp_rmaker_param_update_and_report(param, val);
+    }
+    else if (strcmp(esp_rmaker_param_get_name(param), freq_coarse_param_name) == 0) {
+        ESP_LOGI(TAG, "Received value = %s for %s - %s",
+                val.val.s, esp_rmaker_device_get_name(device),
                 esp_rmaker_param_get_name(param));
         // app_driver_set_state(val.val.b);
         esp_rmaker_param_update_and_report(param, val);
@@ -177,32 +195,58 @@ void Rainmaker_Init(void)
      * You can optionally use the helper API esp_rmaker_switch_device_create() to
      * avoid writing code for adding the name and power parameters.
      */
-    switch_device = esp_rmaker_device_create("Switch", ESP_RMAKER_DEVICE_SWITCH, NULL);
+    rainmaker_device = esp_rmaker_device_create(DEVICE_NAME, DEVICE_TYPE, NULL);
 
     /* Add the write callback for the device. We aren't registering any read callback yet as
      * it is for future use.
      */
-    esp_rmaker_device_add_cb(switch_device, write_cb, NULL);
+    esp_rmaker_device_add_cb(rainmaker_device, write_cb, NULL);
 
     /* Add the standard name parameter (type: esp.param.name), which allows setting a persistent,
      * user friendly custom name from the phone apps. All devices are recommended to have this
      * parameter.
      */
-    esp_rmaker_device_add_param(switch_device, esp_rmaker_name_param_create(ESP_RMAKER_DEF_NAME_PARAM, "Switch"));
+    esp_rmaker_device_add_param(rainmaker_device, esp_rmaker_name_param_create(ESP_RMAKER_DEF_NAME_PARAM, "Switch"));
 
     /* Add the standard power parameter (type: esp.param.power), which adds a boolean param
      * with a toggle switch ui-type.
      */
     esp_rmaker_param_t *power_param = esp_rmaker_power_param_create(ESP_RMAKER_DEF_POWER_NAME, DEFAULT_POWER);
-    esp_rmaker_device_add_param(switch_device, power_param);
+    esp_rmaker_device_add_param(rainmaker_device, power_param);
 
+    esp_rmaker_param_t *fine_part_param = esp_rmaker_param_create(freq_fine_param_name, NULL,
+            esp_rmaker_float(400.0), PROP_FLAG_READ | PROP_FLAG_WRITE);
+    if (fine_part_param) {
+        esp_rmaker_param_add_ui_type(fine_part_param, ESP_RMAKER_UI_SLIDER);
+        esp_rmaker_param_add_bounds(fine_part_param, esp_rmaker_float(0.0f), esp_rmaker_float(1000.0f), esp_rmaker_float(0.1));
+        esp_rmaker_device_add_param(rainmaker_device, fine_part_param);
+    }
+    else
+    {
+        abort();
+    }
+
+    esp_rmaker_param_t *coarse_part_param = esp_rmaker_param_create(freq_coarse_param_name, NULL,
+            esp_rmaker_str("Hz"), PROP_FLAG_READ | PROP_FLAG_WRITE);
+    if (coarse_part_param) {
+        esp_rmaker_param_add_ui_type(coarse_part_param, ESP_RMAKER_UI_DROPDOWN);
+        esp_rmaker_param_add_valid_str_list(coarse_part_param, freq_units, 3);
+        esp_rmaker_device_add_param(rainmaker_device, coarse_part_param);
+    }
+    else
+    {
+        abort();
+    }
+    
     /* Assign the power parameter as the primary, so that it can be controlled from the
      * home screen of the phone apps.
      */
-    esp_rmaker_device_assign_primary_param(switch_device, power_param);
+    esp_rmaker_device_assign_primary_param(rainmaker_device, power_param);
+    esp_rmaker_device_assign_primary_param(rainmaker_device, fine_part_param);
+    esp_rmaker_device_assign_primary_param(rainmaker_device, coarse_part_param);
 
     /* Add this switch device to the node */
-    esp_rmaker_node_add_device(node, switch_device);
+    esp_rmaker_node_add_device(node, rainmaker_device);
 
     /* Enable OTA */
     // esp_rmaker_ota_enable_default();

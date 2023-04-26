@@ -1877,6 +1877,12 @@ CONFIG_IO_GLITCH_FILTER_TIME_MS=50
 # end of WS2812 RGB LED
 
 #
+# ESP Secure Cert Manager
+#
+# CONFIG_ESP_SECURE_CERT_SUPPORT_LEGACY_FORMATS is not set
+# end of ESP Secure Cert Manager
+
+#
 # mDNS
 #
 CONFIG_MDNS_MAX_INTERFACES=3
@@ -1903,12 +1909,6 @@ CONFIG_MDNS_PREDEF_NETIF_AP=y
 CONFIG_MDNS_PREDEF_NETIF_ETH=y
 # end of MDNS Predefined interfaces
 # end of mDNS
-
-#
-# ESP Secure Cert Manager
-#
-# CONFIG_ESP_SECURE_CERT_SUPPORT_LEGACY_FORMATS is not set
-# end of ESP Secure Cert Manager
 # end of Component config
 
 # Deprecated options for backward compatibility
