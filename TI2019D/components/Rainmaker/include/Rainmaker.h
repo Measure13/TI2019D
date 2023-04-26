@@ -24,8 +24,10 @@ typedef struct
 extern esp_rmaker_device_t *rainmaker_device;
 extern const char * freq_units[];
 extern app_driver_info driver_info;
+extern QueueHandle_t xQueue;
 
 void app_driver_init(void);
 void app_driver_set_state(app_driver_info di);
 app_driver_info app_driver_get_state(void);
 void Rainmaker_Init(void);
+void app_driver_SPI(void *pvParameter);

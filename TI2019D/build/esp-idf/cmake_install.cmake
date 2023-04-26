@@ -484,11 +484,11 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/Rainmaker/cmake_install.cmake")
+  include("D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD9833/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD8933/cmake_install.cmake")
+  include("D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/Rainmaker/cmake_install.cmake")
 endif()
 

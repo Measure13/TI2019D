@@ -28,6 +28,8 @@ static const char *TAG = "rainmaker";
 const char * freq_units[] = {"Hz", "kHz", "MHz"};
 esp_rmaker_device_t *rainmaker_device;
 
+QueueHandle_t xQueue;
+
 /* Callback to handle commands received from the RainMaker cloud */
 static esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_param_t *param,
             const esp_rmaker_param_val_t val, void *priv_data, esp_rmaker_write_ctx_t *ctx)
@@ -39,25 +41,25 @@ static esp_err_t write_cb(const esp_rmaker_device_t *device, const esp_rmaker_pa
         ESP_LOGI(TAG, "Received value = %s for %s - %s",
                 val.val.b? "true" : "false", esp_rmaker_device_get_name(device),
                 esp_rmaker_param_get_name(param));
-        // app_driver_set_state(val.val.b);
         driver_info.power_state = true;
-        esp_rmaker_param_update_and_report(param, val);
+        xQueueReset(xQueue);
+        xQueueSend(xQueue, &(driver_info.power_state), portMAX_DELAY);
+        xTaskCreate(app_driver_SPI, "SPI", 1024 * 8, NULL, 2, NULL);
     }
     else if (strcmp(esp_rmaker_param_get_name(param), freq_fine_param_name) == 0) {
         ESP_LOGI(TAG, "Received value = %d for %s - %s",
                 val.val.i, esp_rmaker_device_get_name(device),
                 esp_rmaker_param_get_name(param));
          driver_info.freq_fine = val.val.i;
-        esp_rmaker_param_update_and_report(param, val);
     }
     else if (strcmp(esp_rmaker_param_get_name(param), freq_coarse_param_name) == 0) {
         ESP_LOGI(TAG, "Received value = %s for %s - %s",
                 val.val.s, esp_rmaker_device_get_name(device),
                 esp_rmaker_param_get_name(param));
         driver_info.freq_coarse = val.val.s;
-        esp_rmaker_param_update_and_report(param, val);
     }
-    app_driver_set_state(driver_info);
+    esp_rmaker_param_update_and_report(param, val);
+    // app_driver_set_state(driver_info);
     return ESP_OK;
 }
 /* Event handler for catching RainMaker events */
@@ -119,35 +121,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
                 ESP_LOGW(TAG, "Unhandled App Wi-Fi Event: %"PRIi32, event_id);
                 break;
         }
-    } 
-    // else if (event_base == RMAKER_OTA_EVENT) {
-    //     switch(event_id) {
-    //         case RMAKER_OTA_EVENT_STARTING:
-    //             ESP_LOGI(TAG, "Starting OTA.");
-    //             break;
-    //         case RMAKER_OTA_EVENT_IN_PROGRESS:
-    //             ESP_LOGI(TAG, "OTA is in progress.");
-    //             break;
-    //         case RMAKER_OTA_EVENT_SUCCESSFUL:
-    //             ESP_LOGI(TAG, "OTA successful.");
-    //             break;
-    //         case RMAKER_OTA_EVENT_FAILED:
-    //             ESP_LOGI(TAG, "OTA Failed.");
-    //             break;
-    //         case RMAKER_OTA_EVENT_REJECTED:
-    //             ESP_LOGI(TAG, "OTA Rejected.");
-    //             break;
-    //         case RMAKER_OTA_EVENT_DELAYED:
-    //             ESP_LOGI(TAG, "OTA Delayed.");
-    //             break;
-    //         case RMAKER_OTA_EVENT_REQ_FOR_REBOOT:
-    //             ESP_LOGI(TAG, "Firmware image downloaded. Please reboot your device to apply the upgrade.");
-    //             break;
-    //         default:
-    //             ESP_LOGW(TAG, "Unhandled OTA Event: %"PRIi32, event_id);
-    //             break;
-    //     }
-    // } 
+    }
     else {
         ESP_LOGW(TAG, "Invalid event received!");
     }
@@ -160,6 +134,7 @@ void Rainmaker_Init(void)
      */
     esp_rmaker_console_init();
     app_driver_init();
+    xQueue = xQueueCreate(1, sizeof(bool));
     // app_driver_set_state(DEFAULT_POWER);
 
     /* Initialize NVS. */

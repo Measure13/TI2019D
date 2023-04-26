@@ -721,6 +721,13 @@ D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/PWM/CMakeFiles/list_ins
 D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/PWM/CMakeFiles/install.dir
 D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/PWM/CMakeFiles/install/local.dir
 D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/PWM/CMakeFiles/install/strip.dir
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD9833/CMakeFiles/__idf_SPI_AD9833.dir
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD9833/CMakeFiles/edit_cache.dir
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD9833/CMakeFiles/rebuild_cache.dir
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD9833/CMakeFiles/list_install_components.dir
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD9833/CMakeFiles/install.dir
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD9833/CMakeFiles/install/local.dir
+D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD9833/CMakeFiles/install/strip.dir
 D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/Rainmaker/CMakeFiles/__idf_Rainmaker.dir
 D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/Rainmaker/CMakeFiles/edit_cache.dir
 D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/Rainmaker/CMakeFiles/rebuild_cache.dir
@@ -728,10 +735,3 @@ D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/Rainmaker/CMakeFiles/li
 D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/Rainmaker/CMakeFiles/install.dir
 D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/Rainmaker/CMakeFiles/install/local.dir
 D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/Rainmaker/CMakeFiles/install/strip.dir
-D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD8933/CMakeFiles/__idf_SPI_AD8933.dir
-D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD8933/CMakeFiles/edit_cache.dir
-D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD8933/CMakeFiles/rebuild_cache.dir
-D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD8933/CMakeFiles/list_install_components.dir
-D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD8933/CMakeFiles/install.dir
-D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD8933/CMakeFiles/install/local.dir
-D:/MyWorks/Programs/Github/TI2019D/TI2019D/build/esp-idf/SPI_AD8933/CMakeFiles/install/strip.dir

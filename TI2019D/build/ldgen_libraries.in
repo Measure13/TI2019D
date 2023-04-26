@@ -78,5 +78,5 @@ $<TARGET_FILE:__idf_app_insights>
 $<TARGET_FILE:__idf_app_reset>
 $<TARGET_FILE:__idf_app_wifi>
 $<TARGET_FILE:__idf_PWM>
+$<TARGET_FILE:__idf_SPI_AD9833>
 $<TARGET_FILE:__idf_Rainmaker>
-$<TARGET_FILE:__idf_SPI_AD8933>
