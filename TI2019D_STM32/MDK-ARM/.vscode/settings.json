@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "*.m": "matlab",
+        "*.asm": "asm-collection",
+        "dac.h": "c",
+        "ad9833.h": "c",
+        "usart.h": "c"
+    }
+}
