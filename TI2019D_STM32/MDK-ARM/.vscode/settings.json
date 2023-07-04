@@ -4,6 +4,8 @@
         "*.asm": "asm-collection",
         "dac.h": "c",
         "ad9833.h": "c",
-        "usart.h": "c"
+        "usart.h": "c",
+        "adc.h": "c",
+        "tim.h": "c"
     }
 }

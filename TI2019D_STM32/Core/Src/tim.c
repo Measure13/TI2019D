@@ -21,7 +21,7 @@
 #include "tim.h"
 
 /* USER CODE BEGIN 0 */
-
+uint32_t timer_period = 63;
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim2;
@@ -113,5 +113,11 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 }
 
 /* USER CODE BEGIN 1 */
-
+void Timer_2_Adjust(uint32_t freq)
+{
+	timer_period = 64 * 1000 * 1000 / freq - 1;
+	htim2.Instance->ARR = timer_period;
+	htim2.Instance->CCR2 = timer_period / 2;
+	htim2.Instance->EGR = TIM_EGR_UG;
+}
 /* USER CODE END 1 */

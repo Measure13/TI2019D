@@ -21,6 +21,15 @@
 #include "adc.h"
 
 /* USER CODE BEGIN 0 */
+uint32_t adc_freq = 0;
+uint16_t adc_values[24];
+uint16_t adc_values_cnt = 0;
+uint8_t adc_data_owner = INPUT_RESISTANCE;
+static bool conv_done = false;
+static bool first = true;
+
+double ri = 0;
+double ro = 0;
 
 /* USER CODE END 0 */
 
@@ -154,5 +163,85 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 }
 
 /* USER CODE BEGIN 1 */
+void ADC_Get_Resistance(int channel)
+{
+  uint32_t sum = 0;
+  uint32_t v0, v1;
+  
+  ADC_ChannelConfTypeDef sConfig = {0};
+  sConfig.Channel = channel % 2;
+  sConfig.Rank = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
+  do {
+    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // * start ADC
+    while (!conv_done)
+    {
+      
+    }
+    for (int i = 4; i < MAX_DATA_NUM + 4; ++i)
+    {
+      sum += adc_values[i];
+    }
+    if (first)
+    {
+      v0 = sum / MAX_DATA_NUM;
+    }
+    else
+    {
+      v1 = sum / MAX_DATA_NUM;
+      if (adc_data_owner == INPUT_RESISTANCE)
+      {
+        ri = 6800 / (v0 / v1 - 1);
+      }
+      else
+      {
+        ro = 1500 * (v0 / v1 - 1);
+      }
+    }
+    first = ~first;
+    sum = 0;
+  }while (!first);
+  DAC_Output(ri / 1000);
+  // DAC_Output(ro / 1000);
+}
+
+void ADC_Get_Gain(int channel)
+{
+  uint32_t Ai = 0, Ao = 0, A = 0;
+
+  ADC_ChannelConfTypeDef sConfig = {0};
+  sConfig.Channel = channel % 2;
+  sConfig.Rank = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  do {
+    HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // * start ADC
+    while (!conv_done)
+    {
+      
+    }
+    
+  }while (!first);
+  DAC_Output(ri / 1000);
+  // DAC_Output(ro / 1000);
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	/* Prevent unused argument(s) compilation warning */
+	UNUSED(hadc);
+	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_2);
+	// USART_Conv_Data(adc_values + 4, MAX_DATA_NUM);
+  
+  conv_done = true;
+}
 /* USER CODE END 1 */

@@ -60,6 +60,7 @@ void Error_Handler_Index(int high);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+const uint16_t MAX_DATA_NUM = 20;
 
 /* USER CODE END 0 */
 
@@ -97,7 +98,8 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  AD9833_Default_Set(f);
+  HAL_TIM_Base_Start_IT(&htim2);
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_values, MAX_DATA_NUM + 4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -107,7 +109,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    
+    Error_Handler_Index(150);
   }
   /* USER CODE END 3 */
 }

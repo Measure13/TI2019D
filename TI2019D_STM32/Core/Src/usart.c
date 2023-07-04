@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 #define UART_RX_BUF_SIZE 2048 // 1024 * sizeof(uint16_t)
-// extern uint32_t adc_freq;
+extern uint32_t adc_freq;
 
 static uint8_t uart1_rx_bp[UART_RX_BUF_SIZE];
 static uint8_t uart1_tx_bp[UART_RX_BUF_SIZE];
@@ -160,17 +160,17 @@ int fputc(int ch, FILE *stream)
 	return ch;
 }
 
-// void UART_RX_Data_Parse(uint8_t* p, uint8_t cnt)
-// {
-// 	adc_freq = 0;
-// 	for (int i = 0; i < 4; ++i)
-// 	{
-// 		adc_freq += ((p[i] & 0xff) << (8 * i));
-// 	}
-// 	memset(uart1_tx_bp, 0x00, sizeof(uint8_t) * UART_RX_BUF_SIZE);
-// 	// printf("%d\n", adc_freq);
-// 	Timer_2_Adjust(adc_freq);
-// }
+void UART_RX_Data_Parse(uint8_t* p, uint8_t cnt)
+{
+	adc_freq = 0;
+	for (int i = 0; i < 4; ++i)
+	{
+		adc_freq += ((p[i] & 0xff) << (8 * i));
+	}
+	memset(uart1_tx_bp, 0x00, sizeof(uint8_t) * UART_RX_BUF_SIZE);
+	printf("%d\n", adc_freq);
+	Timer_2_Adjust(adc_freq);
+}
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
@@ -189,10 +189,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	
 		if((uart1_rx_cnt > 3)&&(uart1_rx_bp[uart1_rx_cnt-3] == 0xFF)&&(uart1_rx_bp[uart1_rx_cnt-2] == 0xFF)&&(uart1_rx_bp[uart1_rx_cnt-1] == 0xFF))
 		{
-			// UART_RX_Data_Parse(uart1_rx_bp, uart1_rx_cnt);
+			UART_RX_Data_Parse(uart1_rx_bp, uart1_rx_cnt);
 			uart1_rx_cnt = 0;
 			memset(uart1_rx_bp, 0x00, sizeof(uint8_t) * UART_RX_BUF_SIZE);
-			HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+			HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // * start ADC
 		}
 	}
 	HAL_UART_Receive_IT(&huart1, (uint8_t *)&uart1_rx_buf, 1);

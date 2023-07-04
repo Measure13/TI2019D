@@ -395,6 +395,16 @@
           <GroupName>Application/User/Core</GroupName>
           <Files>
             <File>
+              <FileName>AD9833.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\AD9833.c</FilePath>
+            </File>
+            <File>
+              <FileName>relay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\relay.c</FilePath>
+            </File>
+            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/main.c</FilePath>
@@ -491,14 +501,24 @@
               <FilePath>../Core/Src/stm32f4xx_hal_msp.c</FilePath>
             </File>
             <File>
-              <FileName>AD9833.c</FileName>
+              <FileName>USART_HMI.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Core\Src\AD9833.c</FilePath>
+              <FilePath>..\Core\Src\USART_HMI.c</FilePath>
+            </File>
+            <File>
+              <FileName>USART_HMI.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\USART_HMI.h</FilePath>
             </File>
             <File>
               <FileName>AD9833.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\Core\Src\AD9833.h</FilePath>
+              <FilePath>..\Core\Inc\AD9833.h</FilePath>
+            </File>
+            <File>
+              <FileName>relay.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\relay.h</FilePath>
             </File>
           </Files>
         </Group>

@@ -1,5 +1,7 @@
 --cpu=Cortex-M4.fp.sp
 "ti2019d_stm32\startup_stm32f407xx.o"
+"ti2019d_stm32\ad9833.o"
+"ti2019d_stm32\relay.o"
 "ti2019d_stm32\main.o"
 "ti2019d_stm32\gpio.o"
 "ti2019d_stm32\adc.o"
@@ -9,7 +11,7 @@
 "ti2019d_stm32\usart.o"
 "ti2019d_stm32\stm32f4xx_it.o"
 "ti2019d_stm32\stm32f4xx_hal_msp.o"
-"ti2019d_stm32\ad9833.o"
+"ti2019d_stm32\usart_hmi.o"
 "ti2019d_stm32\stm32f4xx_hal_adc.o"
 "ti2019d_stm32\stm32f4xx_hal_adc_ex.o"
 "ti2019d_stm32\stm32f4xx_ll_adc.o"

@@ -29,12 +29,23 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "usart.h"
+#include "tim.h"
+#include "dac.h"
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 extern ADC_HandleTypeDef hadc1;
 
 /* USER CODE BEGIN Private defines */
+#define INPUT_RESISTANCE  0
+#define OUTPUT_RESISTANCE 1
+#define VIN_VOLTAGE       2
+#define VOUT_VOLTAGE      3
+
+extern uint32_t adc_freq;
+extern uint16_t adc_values[24];
+extern uint8_t adc_data_owner;
 
 /* USER CODE END Private defines */
 
