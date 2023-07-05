@@ -40,19 +40,23 @@ extern ADC_HandleTypeDef hadc1;
 /* USER CODE BEGIN Private defines */
 #define INPUT_RESISTANCE  0
 #define OUTPUT_RESISTANCE 1
-#define VIN_VOLTAGE       2
-#define VOUT_VOLTAGE      3
+#define Amp_Freq_Curv     2
 
 extern uint32_t adc_freq;
-extern uint16_t adc_values[24];
+extern uint16_t adc_values[MAX_DATA_NUM + 4];
 extern uint8_t adc_data_owner;
+extern float Gain[240];
+extern double Ri;
+extern double Ro;
 
 /* USER CODE END Private defines */
 
 void MX_ADC1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+double ADC_Get_Gain(int channel);
+void ADC_Get_Resistance(int channel);
+uint16_t* ADC_Pointer_With_Data(int channel);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

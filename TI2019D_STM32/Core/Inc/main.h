@@ -31,6 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "dac.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,7 +44,8 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-extern const uint16_t MAX_DATA_NUM;
+#define MAX_DATA_NUM 1024
+extern uint32_t DDS_Freq;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/

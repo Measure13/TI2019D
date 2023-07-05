@@ -214,3 +214,13 @@ void UARTHMI_Send_Number(uint8_t index, int number)
 {
     UARTHMI_Set_Number(index, number);
 }
+
+void UARTHMI_ADC_Data_Display(uint16_t* adc_data_pointer)
+{
+	float adc_data[MAX_DATA_NUM];
+	for (int i = 4; i < MAX_DATA_NUM + 4; ++i)
+	{
+		adc_data[i - 4] = (float)adc_data_pointer[i];
+	}
+	UARTHMI_Draw_Curve_addt(adc_data, MAX_DATA_NUM);
+}

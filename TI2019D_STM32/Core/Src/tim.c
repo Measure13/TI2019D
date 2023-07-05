@@ -21,7 +21,7 @@
 #include "tim.h"
 
 /* USER CODE BEGIN 0 */
-uint32_t timer_period = 63;
+
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim2;
@@ -31,7 +31,7 @@ void MX_TIM2_Init(void)
 {
 
   /* USER CODE BEGIN TIM2_Init 0 */
-
+	
   /* USER CODE END TIM2_Init 0 */
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
@@ -115,6 +115,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 /* USER CODE BEGIN 1 */
 void Timer_2_Adjust(uint32_t freq)
 {
+	uint32_t timer_period;
 	timer_period = 64 * 1000 * 1000 / freq - 1;
 	htim2.Instance->ARR = timer_period;
 	htim2.Instance->CCR2 = timer_period / 2;

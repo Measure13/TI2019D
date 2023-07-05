@@ -27,8 +27,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdio.h>
-#include "AD9833.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,20 +48,18 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-static uint32_t f = 1;
-static uint8_t data_to_send[] = {0xA3, 0xFD, 0x3A, 0xDF};
-static float data_to[] = {0.67, 0.33, 1.34, 1.67, 0.67, 0.67, 0.33, 1.34, 1.67, 0.67, 0.67, 0.33, 1.34, 1.67, 0.67, 0.67, 0.33, 1.34, 1.67, 0.67};
+uint32_t DDS_Freq = 1;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-void Error_Handler_Index(int high);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-const uint16_t MAX_DATA_NUM = 1024;
 
 /* USER CODE END 0 */
 
@@ -96,19 +93,17 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_ADC1_Init();
+  MX_TIM2_Init();
   MX_DAC_Init();
   MX_USART1_UART_Init();
-  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start_IT(&htim2);
+	DAC_Output(0.1);
+	HAL_TIM_Base_Start_IT(&htim2);
+	
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_values, MAX_DATA_NUM + 4);
-  AD9833_Default_Set(4);
-  UARTHMI_Draw_Curve_addt(data_to, 20);
-  UARTHMI_Send_Float(0, 7.0034f);
-  UARTHMI_Send_Float(1, 1.234f);
-  UARTHMI_Send_Number(0, 193);
-  UARTHMI_Send_Text(5, R1);
-  UARTHMI_Send_Text(6, OPEN_CIRCUIT);
+	Timer_2_Adjust(1000000);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+	
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -118,7 +113,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
   }
   /* USER CODE END 3 */
 }
@@ -170,16 +164,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void Error_Handler_Index(int high)
-{
-	while (1)
-	{
-		DAC_Output(2.5);
-		HAL_Delay(high);
-		DAC_Output(0.5);
-		HAL_Delay(500 - high);
-	}
-}
+
 /* USER CODE END 4 */
 
 /**
@@ -191,10 +176,13 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
-  while (1)
-  {
-    DAC_Output(2.5);
-  }
+	while (1)
+	{
+		DAC_Output(2.5);
+		HAL_Delay(350);
+		DAC_Output(0.5);
+		HAL_Delay(150);
+	}
   /* USER CODE END Error_Handler_Debug */
 }
 
@@ -211,8 +199,6 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  printf("Wrong parameters value: file %s on line %d\r\n", file, line);
-  DAC_Output(2.0);
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
