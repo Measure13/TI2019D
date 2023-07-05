@@ -27,7 +27,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "AD9833.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,7 +48,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint32_t DDS_Freq = 1;
+uint32_t DDS_Freq = 1100;
 
 /* USER CODE END PV */
 
@@ -102,8 +102,8 @@ int main(void)
 	
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_values, MAX_DATA_NUM + 4);
 	Timer_2_Adjust(1000000);
-	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
-	
+	uint16_t *p = ADC_Pointer_With_Data(INPUT_RESISTANCE);
+	UARTHMI_ADC_Data_Display(p);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -113,6 +113,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  
   }
   /* USER CODE END 3 */
 }

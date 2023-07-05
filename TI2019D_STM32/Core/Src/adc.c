@@ -29,7 +29,7 @@ static double complex output[MAX_DATA_NUM];
 uint16_t adc_values[MAX_DATA_NUM + 4];
 uint16_t adc_values_cnt = 0;
 uint8_t adc_data_owner = INPUT_RESISTANCE;
-static bool conv_done = false;
+static volatile bool conv_done = false;
 static bool first = true;
 
 double Ri = 0;
@@ -132,7 +132,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     __HAL_LINKDMA(adcHandle,DMA_Handle,hdma_adc1);
 
     /* ADC1 interrupt Init */
-    HAL_NVIC_SetPriority(ADC_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(ADC_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(ADC_IRQn);
   /* USER CODE BEGIN ADC1_MspInit 1 */
 
@@ -353,16 +353,13 @@ uint16_t* ADC_Pointer_With_Data(int channel)
 	{
 		Error_Handler();
 	}
-	DAC_Output(0.5);
 	memset(adc_values, 0x00, sizeof(uint16_t) * (MAX_DATA_NUM + 4));
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // * start ADC
-	DAC_Output(0.7);
 	while (!conv_done)
 	{
 		
 	}
 	conv_done = false;
-	DAC_Output(0.9);
 	return adc_values;
 }
 
@@ -371,7 +368,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	/* Prevent unused argument(s) compilation warning */
 	UNUSED(hadc);
 	HAL_TIM_PWM_Stop(&htim2, TIM_CHANNEL_2);
-    DAC_Output(2.9);
 	conv_done = true;
 }
 /* USER CODE END 1 */

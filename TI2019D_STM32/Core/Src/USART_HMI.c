@@ -2,9 +2,13 @@
 #include <string.h>
 #include <math.h>
 
-bool initialization_done = false;
-bool ready_to_receive = false;
-bool receive_done = false;
+volatile bool initialization_done = false;
+volatile bool ready_to_receive = false;
+volatile bool receive_done = false;
+static const int MAX_SEND_LEN = 240;
+static const int MAX_SEND_DATA = 240;
+static uint8_t data_tmp_write[MAX_SEND_DATA];
+static float adc_data[MAX_DATA_NUM];
 
 static int UARTHMI_Append_Ending(uint8_t* dest)
 {
@@ -21,33 +25,22 @@ static int UARTHMI_Append_Ending(uint8_t* dest)
 
 void UARTHMI_Draw_Curve_addt(float* pf, uint16_t num)
 {
-    uint8_t START_TRANS[30] = "addt s0.id,0,";
-    uint8_t numstr[7];
-    static const int MAX_SEND_LEN = 256;
-    static const int MAX_SEND_DATA = 240;
-    uint8_t* data_tmp_write;
     int i, data_len, total_num, send_num, interval_num;
     float max_gain = pf[0], coef = 0, min_gain = pf[0];
 
     total_num = num;
-    interval_num = num / MAX_SEND_LEN;
+    interval_num = num / MAX_SEND_LEN + 1;
     if (interval_num)
         send_num = num / interval_num;
-    else
+    else{
         interval_num = 1;
         send_num = num;
-    data_tmp_write = (uint8_t*)malloc(send_num + 5); // +5 for safe
-    //max num:256
-    sprintf((char*)numstr, "%d", send_num);
-    strcat((char*)START_TRANS, (const char*)numstr);
-    data_len = UARTHMI_Append_Ending(START_TRANS);
-    recving = false;
-    USART_Send_Data_Direct(START_TRANS, data_len);
-    do
+    }
+    printf("addt s0.id,0,%d\xff\xff\xff", send_num);
+    while (!ready_to_receive)
     {
-        HAL_Delay(100);        
-    }while (!ready_to_receive);
-
+        
+    }
     for (i = total_num - 1; i >= 0; i -= interval_num)
     {
         if (max_gain < pf[i])
@@ -65,11 +58,10 @@ void UARTHMI_Draw_Curve_addt(float* pf, uint16_t num)
         data_tmp_write[(total_num - 1 - i) / interval_num] = (uint8_t)((pf[i] - min_gain) * coef);
     }
     USART_Send_Data_Direct(data_tmp_write, send_num);
-    do
+    while (!receive_done)
     {
-        HAL_Delay(1);
-    } while (!receive_done);
-    
+        
+    }
     free(data_tmp_write);
 }
 
@@ -217,7 +209,6 @@ void UARTHMI_Send_Number(uint8_t index, int number)
 
 void UARTHMI_ADC_Data_Display(uint16_t* adc_data_pointer)
 {
-	float adc_data[MAX_DATA_NUM];
 	for (int i = 4; i < MAX_DATA_NUM + 4; ++i)
 	{
 		adc_data[i - 4] = (float)adc_data_pointer[i];
