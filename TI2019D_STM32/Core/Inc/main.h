@@ -69,7 +69,17 @@ void Error_Handler(void);
 #define SPI1_CS_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
+#define OPEN_CIRCUIT      0
+#define SHORT_CIRCUIT     1
+#define TOO_LARGE         2
 
+#define R1  0
+#define R2  1
+#define R3  2
+#define R4  3
+#define C1  4
+#define C2  5
+#define C3  6
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

@@ -6,6 +6,9 @@
         "ad9833.h": "c",
         "usart.h": "c",
         "adc.h": "c",
-        "tim.h": "c"
+        "tim.h": "c",
+        "complex.h": "c",
+        "usart_hmi.h": "c",
+        "main.h": "c"
     }
 }

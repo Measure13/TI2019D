@@ -29,13 +29,18 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "adc.h"
+#include "tim.h"
+#include "USART_HMI.h"
+#include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN Private defines */
-
+extern uint8_t USART_RxBuffer;
+extern bool recving;
 /* USER CODE END Private defines */
 
 void MX_USART1_UART_Init(void);

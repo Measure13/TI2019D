@@ -21,11 +21,10 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-#include "adc.h"
-#include "tim.h"
-#include <stdio.h>
-#include <string.h>
 #define UART_RX_BUF_SIZE 2048 // 1024 * sizeof(uint16_t)
+
+uint8_t USART_RxBuffer = 0;
+bool recving = false;
 extern uint32_t adc_freq;
 
 static uint8_t uart1_rx_bp[UART_RX_BUF_SIZE];
@@ -38,7 +37,6 @@ static const int batch = 16;
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
-DMA_HandleTypeDef hdma_usart1_tx;
 
 /* USART1 init function */
 
@@ -94,30 +92,11 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-    /* USART1 DMA Init */
-    /* USART1_TX Init */
-    hdma_usart1_tx.Instance = DMA2_Stream7;
-    hdma_usart1_tx.Init.Channel = DMA_CHANNEL_4;
-    hdma_usart1_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
-    hdma_usart1_tx.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_usart1_tx.Init.MemInc = DMA_MINC_ENABLE;
-    hdma_usart1_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    hdma_usart1_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    hdma_usart1_tx.Init.Mode = DMA_CIRCULAR;
-    hdma_usart1_tx.Init.Priority = DMA_PRIORITY_LOW;
-    hdma_usart1_tx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-    if (HAL_DMA_Init(&hdma_usart1_tx) != HAL_OK)
-    {
-      Error_Handler();
-    }
-
-    __HAL_LINKDMA(uartHandle,hdmatx,hdma_usart1_tx);
-
     /* USART1 interrupt Init */
     HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(USART1_IRQn);
   /* USER CODE BEGIN USART1_MspInit 1 */
-
+    HAL_UART_Receive_DMA(&huart1, &USART_RxBuffer, 1);
   /* USER CODE END USART1_MspInit 1 */
   }
 }
@@ -139,9 +118,6 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
     */
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_9|GPIO_PIN_10);
 
-    /* USART1 DMA DeInit */
-    HAL_DMA_DeInit(uartHandle->hdmatx);
-
     /* USART1 interrupt Deinit */
     HAL_NVIC_DisableIRQ(USART1_IRQn);
   /* USER CODE BEGIN USART1_MspDeInit 1 */
@@ -162,14 +138,23 @@ int fputc(int ch, FILE *stream)
 
 void UART_RX_Data_Parse(uint8_t* p, uint8_t cnt)
 {
-	adc_freq = 0;
-	for (int i = 0; i < 4; ++i)
-	{
-		adc_freq += ((p[i] & 0xff) << (8 * i));
-	}
-	memset(uart1_tx_bp, 0x00, sizeof(uint8_t) * UART_RX_BUF_SIZE);
-	printf("%d\n", adc_freq);
-	Timer_2_Adjust(adc_freq);
+  initialization_done = false;
+  ready_to_receive = false;
+  receive_done = false;
+	switch (p[0])
+  {
+  case 0x88:
+    initialization_done = true;
+    break;
+  case 0xFE:
+    ready_to_receive = true;
+    break;
+  case 0xFD:
+    receive_done = true;
+    break;
+  default:
+    break;
+  }
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
@@ -185,6 +170,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	}
 	else
 	{
+    recving = true;
 		uart1_rx_bp[uart1_rx_cnt++] = uart1_rx_buf;
 	
 		if((uart1_rx_cnt > 3)&&(uart1_rx_bp[uart1_rx_cnt-3] == 0xFF)&&(uart1_rx_bp[uart1_rx_cnt-2] == 0xFF)&&(uart1_rx_bp[uart1_rx_cnt-1] == 0xFF))
@@ -192,7 +178,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 			UART_RX_Data_Parse(uart1_rx_bp, uart1_rx_cnt);
 			uart1_rx_cnt = 0;
 			memset(uart1_rx_bp, 0x00, sizeof(uint8_t) * UART_RX_BUF_SIZE);
-			HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // * start ADC
 		}
 	}
 	HAL_UART_Receive_IT(&huart1, (uint8_t *)&uart1_rx_buf, 1);
