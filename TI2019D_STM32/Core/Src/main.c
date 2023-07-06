@@ -142,6 +142,7 @@ int main(void)
     }
   }
   UARTHMI_Send_Number(0, freq_upper / 1000);
+  UARTHMI_Send_Number(1, (int)A_mf);
   UARTHMI_Draw_Curve_addt(0, Gain_Array, MAX_SEND_LEN);
   if (!already)
   {
