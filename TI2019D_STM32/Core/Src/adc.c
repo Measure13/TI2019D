@@ -23,20 +23,24 @@
 /* USER CODE BEGIN 0 */
 #include<math.h>
 #include<complex.h>
-#define PI 3.14159265
+#define PI  3.14159265
+#define OP  50
 uint32_t adc_freq = 0;
-static double complex output[MAX_DATA_NUM];
+//static float complex output[MAX_DATA_NUM];
+static float temp[MAX_DATA_NUM];
+// static float complex x[2*MAX_DATA_NUM];
 uint16_t adc_values[MAX_DATA_NUM + 4];
 uint16_t adc_values_cnt = 0;
 uint8_t adc_data_owner = INPUT_RESISTANCE;
 static volatile bool conv_done = false;
 static bool first = true;
 
-double Ri = 0;
-double Ro = 0;
-float Gain[240];
+float Ri = 0;
+float Ro = 0;
+//float Gain[240];
 
-static double ADC_Get_FFTVpp(double* data, double complex *output, int f, int N);
+// static float ADC_Get_FFTVpp(float* data, float complex *output, int f, int N);
+static float ADC_Get_Vpp(float* data);
 
 /* USER CODE END 0 */
 
@@ -78,7 +82,7 @@ void MX_ADC1_Init(void)
 
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
   */
-  sConfig.Channel = ADC_CHANNEL_0;
+  sConfig.Channel = ADC_CHANNEL_1;
   sConfig.Rank = 1;
   sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
@@ -106,8 +110,9 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     __HAL_RCC_GPIOA_CLK_ENABLE();
     /**ADC1 GPIO Configuration
     PA0-WKUP     ------> ADC1_IN0
+    PA1     ------> ADC1_IN1
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_0;
+    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -153,8 +158,9 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 
     /**ADC1 GPIO Configuration
     PA0-WKUP     ------> ADC1_IN0
+    PA1     ------> ADC1_IN1
     */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0);
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0|GPIO_PIN_1);
 
     /* ADC1 DMA DeInit */
     HAL_DMA_DeInit(adcHandle->DMA_Handle);
@@ -170,8 +176,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 /* USER CODE BEGIN 1 */
 void ADC_Get_Resistance(int channel)
 {
-	uint32_t sum = 0;
-	uint32_t v0, v1;
+	float v0, v1;
 	
 	ADC_ChannelConfTypeDef sConfig = {0};
 	sConfig.Channel = channel % 2;
@@ -181,45 +186,80 @@ void ADC_Get_Resistance(int channel)
 	{
 		Error_Handler();
 	}
-
+    SW2_DISC;
+    SW3_CONN;
 	do {
-		HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // * start ADC
-		while (!conv_done)
-		{
-			
-		}
-		conv_done = false;
-		for (int i = 4; i < MAX_DATA_NUM + 4; ++i)
-		{
-			sum += adc_values[i];
-		}
 		if (first)
 		{
-			v0 = sum / MAX_DATA_NUM;
+            if (adc_data_owner == INPUT_RESISTANCE)
+            {
+                SW0_CONN;
+                SW1_DISC;
+            }
+            else if (adc_data_owner == OUTPUT_RESISTANCE)
+            {
+                SW0_CONN;
+                SW1_DISC;
+            }
+            HAL_Delay(RELAY_DELAY);
+			Timer_2_Adjust(1000000);
+			memset(adc_values, 0x0000, sizeof(uint16_t) * (MAX_DATA_NUM + 4));
+            HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // * start ADC
+            while (!conv_done)
+            {
+                
+            }
+            conv_done = false;
+            for (int i = 4; i < MAX_DATA_NUM + 4; ++i)
+            {
+                temp[i - 4] = (float)adc_values[i];
+            }
+            v0 = ADC_Get_Vpp(temp);
 		}
 		else
 		{
-			v1 = sum / MAX_DATA_NUM;
+            if (adc_data_owner == INPUT_RESISTANCE)
+            {
+                SW0_DISC;
+                SW1_DISC;
+            }
+            else if (adc_data_owner == OUTPUT_RESISTANCE)
+            {
+                SW0_CONN;
+                SW1_CONN;
+            }
+            HAL_Delay(RELAY_DELAY);
+			Timer_2_Adjust(1000000);
+			memset(adc_values, 0x0000, sizeof(uint16_t) * (MAX_DATA_NUM + 4));
+            HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // * start ADC
+            while (!conv_done)
+            {
+                
+            }
+            conv_done = false;
+            for (int i = 4; i < MAX_DATA_NUM + 4; ++i)
+            {
+                temp[i - 4] = (float)adc_values[i];
+            }
+            v1 = ADC_Get_Vpp(temp);
 			if (adc_data_owner == INPUT_RESISTANCE)
 			{
-				Ri = 6800 / (v0 / v1 - 1);
-				DAC_Output(Ri / 1000);
+				Ri = 6800.0f / (v0 / v1 - 1.0f);
+				UARTHMI_Send_Float(0, Ri / 1000.0f); //kilo om
 			}
 			else
 			{
-				Ro = 1500 * (v0 / v1 - 1);
-				DAC_Output(Ro / 1000);
+				Ro = 1500.0f * (v0 / v1 - 1.0f);
+				UARTHMI_Send_Float(1, Ro / 1000.0f);
 			}
 		}
-		first = ~first;
-		sum = 0;
+		first = (first == true);
 	}while (!first);
 }
 
-double ADC_Get_Gain(int channel)
+float ADC_Get_Gain()
 {
-	double FFTVpp0, FFTVpp1, Gain;
-	double temp[MAX_DATA_NUM];
+	float FFTVpp0, FFTVpp1, Gain;
 
 	ADC_ChannelConfTypeDef sConfig = {0};
 	sConfig.Channel = ADC_CHANNEL_0;
@@ -229,9 +269,17 @@ double ADC_Get_Gain(int channel)
 	{
 		Error_Handler();
 	}
-
 	do {
-		HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // * start ADC
+		if (DDS_Freq < 1000)
+		{
+			Timer_2_Adjust(100000);
+		}
+		else
+		{
+			Timer_2_Adjust(1000000);
+		}
+		memset(adc_values, 0x0000, sizeof(uint16_t) * (MAX_DATA_NUM + 4));
+		HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
 		while (!conv_done)
 		{
 			
@@ -239,11 +287,12 @@ double ADC_Get_Gain(int channel)
 		conv_done = false;
 		for (int i = 4; i < MAX_DATA_NUM + 4; ++i)
 		{
-			temp[i - 4] = (double)adc_values[i];
+			temp[i - 4] = (float)adc_values[i];
 		}
 		if (first)
-			FFTVpp0 = ADC_Get_FFTVpp(temp, output, DDS_Freq, MAX_DATA_NUM);
-
+        {
+            FFTVpp0 = ADC_Get_Vpp(temp) / 100.0f; //* The input signal is amplified 100 times
+            // prepare for the other one
 			sConfig.Channel = ADC_CHANNEL_1;
 			sConfig.Rank = 1;
 			sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
@@ -251,100 +300,52 @@ double ADC_Get_Gain(int channel)
 			{
 				Error_Handler();
 			}
+        }
 		else
 		{
-			FFTVpp1 = ADC_Get_FFTVpp(temp, output, DDS_Freq, MAX_DATA_NUM);
+            FFTVpp1 = ADC_Get_Vpp(temp);
 			Gain = FFTVpp1 / FFTVpp0;
 		}
-		first = ~first;
+		first = (first == false);
 	}while (!first);
 	return Gain;
 }
 
-static void hammingWindow(double* frame,int FRAME_LEN) {
-    for (int i = 0; i < FRAME_LEN; i++) {
-        frame[i] *= 0.54 - 0.46 * cos(2 * PI * i / FRAME_LEN);
-    }
-}
-
-static void fft(double complex *x, int N, double complex *X)
+static float ADC_Get_Vpp(float* data)
 {
-    if (N == 1) {
-        *X = *x;
-        return;
-    }
-
-    double complex odd[N / 2];
-    double complex even[N / 2];
-
-    for (int i = 0; i < N / 2; i++) {
-        even[i] = x[2 * i];
-        odd[i] = x[2 * i + 1];
-    }
-
-    double complex Even[N / 2];
-    double complex Odd[N / 2];
-    fft(even, N / 2, Even);
-    fft(odd, N / 2, Odd);
-
-    for (int k = 0; k < N / 2; ++k) {
-        double complex twiddle_factor = cexp(-2 * PI * I * k / N);
-        X[k] = Even[k] + twiddle_factor * Odd[k];
-        X[k + N / 2] = Even[k] - twiddle_factor * Odd[k];
-    }
-}
-
-static void rfft(double *input, int N, double complex *output)
-{
-    double complex x[2*N];
-    for (int i = 0; i < N; i++) {
-        if (i < N / 2) {
-            x[i] = input[2 * i];
-        } else {
-            x[i] = input[2 * (N - i - 1)];
-        }
-        x[i + 1] = 0;
-    }
-
-    fft(x, N, output);
-}
-
-static double ADC_Get_FFTVpp(double* data, double complex *output, int f, int N)
-{
-    if(f < 100000){
-        double max = data[0];
-        double min = data[0];
-        for(int i = 0; i < N; ++i){
+    if(DDS_Freq < 100000){
+        float max = data[0];
+        float min = data[0];
+        for(int i = 0; i < MAX_DATA_NUM; ++i){
             if(data[i] > max) max = data[i];
             if(data[i] < min) min = data[i];
         }
         return (max - min);
     }
-    else{
-        hammingWindow(data,1024);
-        rfft(data, N, output);
-        double FFTVpp0 = 0,FFTVpp = 0;
-        double A ;
-        int P;
-        for(int i = 10; i < N / 2; ++i){
-            A = sqrt(creal(output[i]) * creal(output[i]) + cimag(output[i]) * cimag(output[i]));
-            if(A > FFTVpp0) {
-                FFTVpp0 = A;
-                P = i;
-            }
+    else
+    {
+        float cos_theta = cosf(2 * PI * DDS_Freq / 1000000), sin_theta = sinf(2 * PI * DDS_Freq / 1000000);
+        float DC = 0, A = 0;
+        for(int i = 0; i < OP; ++i){
+            DC += data[i];
         }
-        for(int i = P-20; i < P+20; ++i){
-            A = sqrt(creal(output[i]) * creal(output[i]) + cimag(output[i]) * cimag(output[i]));
-            if(A > FFTVpp0 / 20){
-                FFTVpp = sqrt(FFTVpp * FFTVpp + A * A);
-            }
+        DC /= OP;
+        for (int i = 0; i < OP; i += 2)
+        {
+            A += sqrtf(powf((data[i + 1] - DC - cos_theta * (data[i] - DC)) / sin_theta, 2.0f) + (data[i] - DC) * (data[i] - DC));
         }
-        return FFTVpp;
+        A /= OP;
+        return A * 2;
     }
+    
 }
 
-uint16_t* ADC_Pointer_With_Data(int channel)
+//! Note the channel! Only 0 and 1 is reachable!
+float ADC_Get_DC_Voltage(int channel)
 {
+    uint16_t max;
+    uint16_t min;
+    float Voltage = 0;
 	ADC_ChannelConfTypeDef sConfig = {0};
 	sConfig.Channel = channel % 2;
 	sConfig.Rank = 1;
@@ -360,7 +361,17 @@ uint16_t* ADC_Pointer_With_Data(int channel)
 		
 	}
 	conv_done = false;
-	return adc_values;
+    max = adc_values[4];
+    min = adc_values[4];
+    for(int i = 5; i < MAX_DATA_NUM + 4; ++i){
+        if(adc_values[i] > max) max = adc_values[i];
+        if(adc_values[i] < min) min = adc_values[i];
+        Voltage += (float)adc_values[i];
+    }
+    Voltage /= MAX_DATA_NUM;
+    Voltage += (float)(max + min);
+    
+	return Voltage / 4096.0f * 1.1f; // 3.3 / 3 = 1.1
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)

@@ -32,6 +32,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "dac.h"
+#include "relay.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,17 +72,19 @@ void Error_Handler(void);
 #define SPI1_CS_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
-#define OPEN_CIRCUIT      0
-#define SHORT_CIRCUIT     1
-#define TOO_LARGE         2
+#define NO  0
+#define OPEN_CIRCUIT      1
+#define SHORT_CIRCUIT     2
+#define TOO_LARGE         3
 
-#define R1  0
-#define R2  1
-#define R3  2
-#define R4  3
-#define C1  4
-#define C2  5
-#define C3  6
+#define R1  1
+#define R2  2
+#define R3  3
+#define R4  4
+#define C1  5
+#define C2  6
+#define C3  7
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

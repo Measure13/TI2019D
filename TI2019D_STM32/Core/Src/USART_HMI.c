@@ -5,8 +5,6 @@
 volatile bool initialization_done = false;
 volatile bool ready_to_receive = false;
 volatile bool receive_done = false;
-static const int MAX_SEND_LEN = 240;
-static const int MAX_SEND_DATA = 240;
 static uint8_t data_tmp_write[MAX_SEND_DATA];
 static float adc_data[MAX_DATA_NUM];
 
@@ -23,24 +21,25 @@ static int UARTHMI_Append_Ending(uint8_t* dest)
     return dest_end_index;
 }
 
-void UARTHMI_Draw_Curve_addt(float* pf, uint16_t num)
+void UARTHMI_Draw_Curve_addt(int index, float* pf, uint16_t num)
 {
-    int i, data_len, total_num, send_num, interval_num;
+    int i, total_num, send_num, interval_num;
     float max_gain = pf[0], coef = 0, min_gain = pf[0];
 
     total_num = num;
-    interval_num = num / MAX_SEND_LEN + 1;
+    interval_num = num / MAX_SEND_LEN; // adjust here every time reuse it
     if (interval_num)
         send_num = num / interval_num;
     else{
         interval_num = 1;
         send_num = num;
     }
-    printf("addt s0.id,0,%d\xff\xff\xff", send_num);
+    printf("addt s%d.id,0,%d\xff\xff\xff", index, send_num);
     while (!ready_to_receive)
     {
         
     }
+	ready_to_receive = false;
     for (i = total_num - 1; i >= 0; i -= interval_num)
     {
         if (max_gain < pf[i])
@@ -62,7 +61,7 @@ void UARTHMI_Draw_Curve_addt(float* pf, uint16_t num)
     {
         
     }
-    free(data_tmp_write);
+	receive_done = false;
 }
 
 static uint8_t UARTHMI_Get_Integer_Digits(int integer)
@@ -213,5 +212,5 @@ void UARTHMI_ADC_Data_Display(uint16_t* adc_data_pointer)
 	{
 		adc_data[i - 4] = (float)adc_data_pointer[i];
 	}
-	UARTHMI_Draw_Curve_addt(adc_data, MAX_DATA_NUM);
+	UARTHMI_Draw_Curve_addt(0, adc_data, MAX_DATA_NUM);
 }

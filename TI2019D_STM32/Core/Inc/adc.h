@@ -46,17 +46,17 @@ extern uint32_t adc_freq;
 extern uint16_t adc_values[MAX_DATA_NUM + 4];
 extern uint8_t adc_data_owner;
 extern float Gain[240];
-extern double Ri;
-extern double Ro;
+extern float Ri;
+extern float Ro;
 
 /* USER CODE END Private defines */
 
 void MX_ADC1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-double ADC_Get_Gain(int channel);
+float ADC_Get_Gain(void);
 void ADC_Get_Resistance(int channel);
-uint16_t* ADC_Pointer_With_Data(int channel);
+float ADC_Get_DC_Voltage(int channel);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
