@@ -165,8 +165,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  // printf("Gain:%f\n", ADC_Get_Gain());
-    // HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }

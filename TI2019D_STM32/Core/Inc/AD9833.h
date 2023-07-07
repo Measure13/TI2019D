@@ -15,6 +15,7 @@
 #define DAT_1 HAL_GPIO_WritePin(GPIOA, SPI1_DAT_Pin, GPIO_PIN_SET)
 
 void AD9833_Init(void);
+void AD9833_Set_Amplitude(uint8_t Amp);
 void AD9833_Transmit(uint16_t content);
 void AD9833_Reset(void);
 void AD9833_Set_Freq(uint32_t output_freq);

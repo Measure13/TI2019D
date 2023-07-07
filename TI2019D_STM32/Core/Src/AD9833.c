@@ -31,11 +31,32 @@ void AD9833_Init(void)
   FSYNC_1;
 }
 
+/// @brief control MCP41010 to control the output amplitude, maximum is constrained by AD8051, about 3.20V; original Vpp is about 1.90V.
+/// @param Amp ranging from 0 to 255
+void AD9833_Set_Amplitude(uint8_t Amp)
+{
+  uint16_t temp = 0x1100;
+  FSYNC_1;
+  CS_0;
+  temp |= Amp;
+  for (uint8_t i = 0; i < 16; ++i)
+  {
+    SCK_0;	
+	  if(temp&0x8000)
+	    DAT_1;
+	  else
+		  DAT_0;
+	  SCK_1;
+		temp<<=1;
+  }
+  CS_1;
+}
+
 void AD9833_Transmit(uint16_t content)
 {
   //SCK_1; // seems that only when SCLK is high can you reset FSYNC
+  CS_1;
   FSYNC_0;
-  // CS_0();//this is not so important, though I don't know the exact reason 
   for(int i = 0; i < 16; i++)
 	{
     SCK_1;
@@ -46,7 +67,6 @@ void AD9833_Transmit(uint16_t content)
 		SCK_0;
     content <<= 1;
 	}
-  SCK_0; // just a delay, testing
   SCK_1;
   FSYNC_1;
 }
