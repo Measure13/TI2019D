@@ -191,10 +191,11 @@ void ADC_Get_Resistance(int channel)
 	do {
 		if (first)
 		{
+            // 实际上这个连线是一样的， 第二次也是
             if (adc_data_owner == INPUT_RESISTANCE)
             {
-                SW0_CONN;
-                SW1_DISC;
+                SW0_CONN; // 直接接受Vin
+                SW1_DISC; // 直接接受Vout
             }
             else if (adc_data_owner == OUTPUT_RESISTANCE)
             {
@@ -220,8 +221,8 @@ void ADC_Get_Resistance(int channel)
 		{
             if (adc_data_owner == INPUT_RESISTANCE)
             {
-                SW0_DISC;
-                SW1_DISC;
+                SW0_DISC; // 被前端输出电阻拉低了
+                SW1_DISC; // 被后端输入电阻拉低了
             }
             else if (adc_data_owner == OUTPUT_RESISTANCE)
             {

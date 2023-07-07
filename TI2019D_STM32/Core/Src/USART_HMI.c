@@ -1,6 +1,7 @@
 #include "USART_HMI.h"
 #include <string.h>
 #include <math.h>
+//! give a reset signal every time a program starts!
 
 volatile bool initialization_done = false;
 volatile bool ready_to_receive = false;
@@ -8,11 +9,16 @@ volatile bool receive_done = false;
 static uint8_t data_tmp_write[MAX_SEND_DATA];
 static float adc_data[MAX_DATA_NUM];
 
-static int UARTHMI_Append_Ending(uint8_t* dest)
+void UARTHMI_Forget_It(void)
+{
+    printf("\x00\xff\xff\xff");
+}
+
+static int UARTHMI_Append_Ending(uint8_t *dest)
 {
     const int ending_len = 3;
     const uint8_t ending[3] = {0xFF, 0xFF, 0xFF};
-    int dest_end_index = strlen((char*)dest);
+    int dest_end_index = strlen((char *)dest);
 
     for (int i = 0; i < ending_len; i++)
     {
@@ -21,47 +27,51 @@ static int UARTHMI_Append_Ending(uint8_t* dest)
     return dest_end_index;
 }
 
-void UARTHMI_Draw_Curve_addt(int index, float* pf, uint16_t num)
+/// @brief Draw a curve on the UART HMI
+/// @param index the **index**th plotter to use
+/// @param pf the pointer to the data head
+/// @param num number of data
+/// @param margin the width of the margin between the curve and the upper and lower boundaries of the screen. If you don't care, just give 0
+void UARTHMI_Draw_Curve_addt(int index, float *pf, uint16_t num, uint8_t margin)
 {
     int i, total_num, send_num, interval_num;
-    float max_gain = pf[0], coef = 0, min_gain = pf[0];
+    float max_data = pf[0], coef = 0, min_data = pf[0];
 
     total_num = num;
     interval_num = num / MAX_SEND_LEN; // adjust here every time reuse it
     if (interval_num)
         send_num = num / interval_num;
-    else{
+    else
+    {
         interval_num = 1;
         send_num = num;
     }
     printf("addt s%d.id,0,%d\xff\xff\xff", index, send_num);
     while (!ready_to_receive)
     {
-        
     }
-	ready_to_receive = false;
+    ready_to_receive = false;
     for (i = total_num - 1; i >= 0; i -= interval_num)
     {
-        if (max_gain < pf[i])
+        if (max_data < pf[i])
         {
-            max_gain = pf[i];
+            max_data = pf[i];
         }
-        if (min_gain > pf[i])
+        if (min_data > pf[i])
         {
-            min_gain = pf[i];
+            min_data = pf[i];
         }
     }
-    coef = MAX_SEND_DATA / (max_gain - min_gain);
+    coef = (MAX_SEND_DATA - 2 * margin) / (max_data - min_data);
     for (i = total_num - 1; i >= 0; i -= interval_num)
     {
-        data_tmp_write[(total_num - 1 - i) / interval_num] = (uint8_t)((pf[i] - min_gain) * coef);
+        data_tmp_write[(total_num - 1 - i) / interval_num] = (uint8_t)((pf[i] - min_data) * coef + margin);
     }
     USART_Send_Data_Direct(data_tmp_write, send_num);
     while (!receive_done)
     {
-        
     }
-	receive_done = false;
+    receive_done = false;
 }
 
 static uint8_t UARTHMI_Get_Integer_Digits(int integer)
@@ -109,13 +119,13 @@ static int UARTHMI_Float_Adjust(float float_num, uint8_t digits_for_integer, uin
 static void UARTHMI_Set_Float(int index, float float_num, uint8_t digits_for_integer, uint8_t digits_for_decimals)
 {
     uint8_t data_len;
-    uint8_t* send_str;
+    uint8_t *send_str;
     uint8_t len = UARTHMI_Get_Integer_Digits(index) + 11 + digits_for_integer + digits_for_decimals;
-    send_str = (uint8_t*)malloc(sizeof(uint8_t) * (len));
+    send_str = (uint8_t *)malloc(sizeof(uint8_t) * (len));
     // if (!send_str)ESP_ERROR_CHECK(ESP_ERR_NO_MEM);
     memset(send_str, 0, sizeof(uint8_t) * (len));
     // ESP_LOGE(TAG, "distortion:%f", float_num);
-    sprintf((char*)send_str, "x%d.val=%d", index, UARTHMI_Float_Adjust(float_num, digits_for_integer, digits_for_decimals));
+    sprintf((char *)send_str, "x%d.val=%d", index, UARTHMI_Float_Adjust(float_num, digits_for_integer, digits_for_decimals));
     data_len = UARTHMI_Append_Ending(send_str);
     USART_Send_Data_Direct(send_str, data_len);
     // ESP_LOGI(TAG, "write done, size:%d", data_len);
@@ -127,13 +137,13 @@ void UARTHMI_Send_Float(int index, float float_num)
     UARTHMI_Set_Float(index, float_num, 1, 2);
 }
 
-void UARTHMI_Set_Text(uint8_t index, uint8_t* char_p)
+void UARTHMI_Set_Text(uint8_t index, uint8_t *char_p)
 {
     uint8_t send_len;
-    uint8_t len = UARTHMI_Get_Integer_Digits(index) + strlen((char*)char_p) + 11 + 5; // +5 for safe
-    uint8_t* send_str = (uint8_t*)malloc(len * sizeof(uint8_t));
+    uint8_t len = UARTHMI_Get_Integer_Digits(index) + strlen((char *)char_p) + 11 + 5; // +5 for safe
+    uint8_t *send_str = (uint8_t *)malloc(len * sizeof(uint8_t));
     memset(send_str, 0, sizeof(uint8_t) * (len));
-    sprintf((char*)send_str, "t%d.txt=\"%s\"", index, char_p);
+    sprintf((char *)send_str, "t%d.txt=\"%s\"", index, char_p);
     send_len = UARTHMI_Append_Ending(send_str);
     USART_Send_Data_Direct(send_str, send_len);
     free(send_str);
@@ -193,9 +203,9 @@ void UARTHMI_Set_Number(uint8_t index, int number)
 {
     uint8_t send_len;
     uint8_t len = UARTHMI_Get_Integer_Digits(index) + UARTHMI_Get_Integer_Digits(number) + 11 + 5; // +5 for safe
-    uint8_t* send_str = (uint8_t*)malloc(len * sizeof(uint8_t));
+    uint8_t *send_str = (uint8_t *)malloc(len * sizeof(uint8_t));
     memset(send_str, 0, sizeof(uint8_t) * (len));
-    sprintf((char*)send_str, "n%d.val=%d", index, number);
+    sprintf((char *)send_str, "n%d.val=%d", index, number);
     send_len = UARTHMI_Append_Ending(send_str);
     USART_Send_Data_Direct(send_str, send_len);
     free(send_str);
@@ -206,11 +216,11 @@ void UARTHMI_Send_Number(uint8_t index, int number)
     UARTHMI_Set_Number(index, number);
 }
 
-void UARTHMI_ADC_Data_Display(uint16_t* adc_data_pointer)
+void UARTHMI_ADC_Data_Display(uint16_t *adc_data_pointer)
 {
-	for (int i = 4; i < MAX_DATA_NUM + 4; ++i)
-	{
-		adc_data[i - 4] = (float)adc_data_pointer[i];
-	}
-	UARTHMI_Draw_Curve_addt(0, adc_data, MAX_DATA_NUM);
+    for (int i = 4; i < MAX_DATA_NUM + 4; ++i)
+    {
+        adc_data[i - 4] = (float)adc_data_pointer[i];
+    }
+    UARTHMI_Draw_Curve_addt(0, adc_data, MAX_DATA_NUM, 0);
 }

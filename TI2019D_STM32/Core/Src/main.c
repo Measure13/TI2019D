@@ -65,14 +65,14 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void Find_Fault_R(void){//Ri为输入电阻，V为直流电压的平均值
-    if(Output_DC > 11.5f  && Ri > 12000.0f)                  {Component = R1; Fault = OPEN_CIRCUIT;} //R1断
-    if(Output_DC > 11.0f  && Output_DC < 11.5f)              {Component = R1; Fault = SHORT_CIRCUIT;}//R1短
-    if(Output_DC > 3.5f   && Output_DC < 5.0f)               {Component = R2; Fault = OPEN_CIRCUIT;} //R2断
-    if(Output_DC > 11.5f  && Ri < 1000.0f)                   {Component = R2; Fault = SHORT_CIRCUIT;}//R2短
-    if(Output_DC > 0.1f   && Output_DC < 1.0f)               {Component = R3; Fault = OPEN_CIRCUIT;} //R3断
-    if(Output_DC > 11.5f  && Ri > 1000.0f && Ri < 3000.0f)   {Component = R3; Fault = SHORT_CIRCUIT;}//R3短
-    if(Output_DC > 11.5f  && Ri > 10000.0f && Ri < 12000.0f) {Component = R4; Fault = OPEN_CIRCUIT;} //R4断
-    if(Output_DC < 0.1f)                                     {Component = R4; Fault = SHORT_CIRCUIT;}//R4短
+    if(Output_DC > 11.5f  && Ri > 12000.0f)                       {Component = R1; Fault = OPEN_CIRCUIT;} //R1断
+    else if(Output_DC > 11.0f  && Output_DC < 11.5f)              {Component = R1; Fault = SHORT_CIRCUIT;}//R1短
+    else if(Output_DC > 3.5f   && Output_DC < 5.0f)               {Component = R2; Fault = OPEN_CIRCUIT;} //R2断
+    else if(Output_DC > 11.5f  && Ri < 1000.0f)                   {Component = R2; Fault = SHORT_CIRCUIT;}//R2短
+    else if(Output_DC > 0.1f   && Output_DC < 1.0f)               {Component = R3; Fault = OPEN_CIRCUIT;} //R3断
+    else if(Output_DC > 11.5f  && Ri > 1000.0f && Ri < 3000.0f)   {Component = R3; Fault = SHORT_CIRCUIT;}//R3短
+    else if(Output_DC > 11.5f  && Ri > 10000.0f && Ri < 12000.0f) {Component = R4; Fault = OPEN_CIRCUIT;} //R4断
+    else if(Output_DC < 0.1f)                                     {Component = R4; Fault = SHORT_CIRCUIT;}//R4短
 }
 /* USER CODE END 0 */
 
@@ -112,6 +112,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	HAL_TIM_Base_Start_IT(&htim2);
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_values, MAX_DATA_NUM + 4);
+  UARTHMI_Forget_It();
 	
   //* start
   DDS_Freq = 1000;
@@ -143,7 +144,7 @@ int main(void)
   }
   UARTHMI_Send_Number(0, freq_upper / 1000);
   UARTHMI_Send_Number(1, (int)A_mf);
-  UARTHMI_Draw_Curve_addt(0, Gain_Array, MAX_SEND_LEN);
+  UARTHMI_Draw_Curve_addt(0, Gain_Array, MAX_SEND_LEN, 10);
   if (!already)
   {
     // printf("up:%d, DC:%f, Ri:%f\n", freq_upper, Output_DC, Ri);
