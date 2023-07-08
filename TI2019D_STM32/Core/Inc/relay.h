@@ -3,7 +3,7 @@
 
 #include "gpio.h"
 
-#define RELAY_DELAY 50 // ms
+#define RELAY_DELAY 100 // ms
 
 #define SW0_DISC    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET)
 #define SW0_CONN    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET)

@@ -38,7 +38,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define MULTI_WINDOW 5
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -126,10 +126,26 @@ int main(void)
   //* start
   DDS_Freq = 1000;
   AD9833_Default_Set(DDS_Freq);
+  HAL_Delay(200);
+
+  float* median_room = (float*)malloc(sizeof(float) * MULTI_WINDOW);
   adc_data_owner = INPUT_RESISTANCE;
-  ADC_Get_Resistance(adc_data_owner);
+  for (uint8_t i = 0; i < MULTI_WINDOW; ++i)
+  {
+    ADC_Get_Resistance(adc_data_owner);
+    median_room[i] = Ri;
+  }
+  Ri = median(median_room, MULTI_WINDOW, true);
+  UARTHMI_Send_Float(0, Ri / 1000.0f);
+  
   adc_data_owner = OUTPUT_RESISTANCE;
-  ADC_Get_Resistance(adc_data_owner);
+  for (uint8_t i = 0; i < MULTI_WINDOW; ++i)
+  {
+    ADC_Get_Resistance(adc_data_owner);
+    median_room[i] = Ro;
+  }
+  Ro = median(median_room, MULTI_WINDOW, true);
+  UARTHMI_Send_Float(1, Ro / 1000.0f);
 
   SW0_CONN;
   SW1_DISC;
@@ -143,8 +159,13 @@ int main(void)
   SW2_DISC;
   SW3_CONN;
   HAL_Delay(RELAY_DELAY);
-  A_mf = ADC_Get_Gain();
+  for (uint8_t i = 0; i < MULTI_WINDOW; ++i)
+  {
+    median_room[i] = ADC_Get_Gain();
+  }
+  A_mf = median(median_room, MULTI_WINDOW, true);
   UARTHMI_Send_Number(1, (int)A_mf);
+  free(median_room);
   A_mf = logf(A_mf);
   for (int i = 0; i < MAX_SEND_LEN; ++i)
   {

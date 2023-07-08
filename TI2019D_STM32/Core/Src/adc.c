@@ -302,12 +302,10 @@ void ADC_Get_Resistance(int channel)
 			if (adc_data_owner == INPUT_RESISTANCE)
 			{
 				Ri = R5 / (v0 / v1 - 1.0f);
-				UARTHMI_Send_Float(0, Ri / 1000.0f);
 			}
 			else
 			{
 				Ro = R8 * (v0 / v1 - 1.0f);
-				UARTHMI_Send_Float(1, Ro / 1000.0f);
 			}
 		}
 		first = !first;
@@ -373,7 +371,7 @@ inline static int Min(int a, int b)
     return a < b ? a : b;
 }
 
-static float median(float* data, uint8_t len, bool flag)
+float median(float* data, uint8_t len, bool flag)
 {
     if (len == 0)
     {
