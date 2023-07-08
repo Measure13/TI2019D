@@ -175,6 +175,9 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 }
 
 /* USER CODE BEGIN 1 */
+
+/// @brief use ADC to do some useless sampling to "warm it up". Doesn't seems to work, though.
+/// @param  No param.
 void ADC_Warm_Up(void)
 {
     uint8_t cnt = 5;

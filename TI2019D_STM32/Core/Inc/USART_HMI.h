@@ -15,4 +15,5 @@ void UARTHMI_Send_Float(int index, float float_num);
 void UARTHMI_Send_Text(uint8_t index, uint8_t wrong_info);
 void UARTHMI_Send_Number(uint8_t index, int number);
 void UARTHMI_ADC_Data_Display(uint16_t* adc_data_pointer);
+void UARTHMI_Reset(void);
 #endif

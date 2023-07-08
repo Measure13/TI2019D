@@ -227,3 +227,8 @@ void UARTHMI_ADC_Data_Display(uint16_t *adc_data_pointer)
     }
     UARTHMI_Draw_Curve_addt(0, adc_data, MAX_DATA_NUM, 0);
 }
+
+void UARTHMI_Reset(void)
+{
+    printf("rest\xff\xff\xff");
+}
