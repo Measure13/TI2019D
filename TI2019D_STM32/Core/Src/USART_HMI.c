@@ -177,6 +177,7 @@ void UARTHMI_Send_Text(uint8_t index, uint8_t wrong_info)
             UARTHMI_Set_Text(index, "C3");
             break;
         default:
+            UARTHMI_Set_Text(index, "");
             break;
         }
     }
@@ -194,6 +195,7 @@ void UARTHMI_Send_Text(uint8_t index, uint8_t wrong_info)
             UARTHMI_Set_Text(index, "\xb9\xfd\xb4\xf3");
             break;
         default:
+            UARTHMI_Set_Text(index, "");
             break;
         }
     }

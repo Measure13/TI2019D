@@ -22,24 +22,25 @@
 
 /* USER CODE BEGIN 0 */
 #include<math.h>
-#include<complex.h>
+
 #define PI  3.14159265
 #define OP  50
+#define R5  2000.0f
+#define R8  2000.0f
+#define ADC1_GAIN   250.0f
+#define MEDIAN_WINDOW   3
+
 uint32_t adc_freq = 0;
-//static float complex output[MAX_DATA_NUM];
 static float temp[MAX_DATA_NUM];
-// static float complex x[2*MAX_DATA_NUM];
 uint16_t adc_values[MAX_DATA_NUM + 4];
 uint16_t adc_values_cnt = 0;
 uint8_t adc_data_owner = INPUT_RESISTANCE;
 static volatile bool conv_done = false;
 static bool first = true;
 
-float Ri = 0;
-float Ro = 0;
-//float Gain[240];
+float Ri = 0.0f;
+float Ro = 0.0f;
 
-// static float ADC_Get_FFTVpp(float* data, float complex *output, int f, int N);
 static float ADC_Get_Vpp(float* data);
 
 /* USER CODE END 0 */
@@ -174,6 +175,61 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 }
 
 /* USER CODE BEGIN 1 */
+void ADC_Warm_Up(void)
+{
+    uint8_t cnt = 5;
+    while (cnt--)
+    {
+        ADC_ChannelConfTypeDef sConfig = {0};
+        sConfig.Channel = ADC_CHANNEL_0;
+        sConfig.Rank = 1;
+        sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+        if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+        {
+            Error_Handler();
+        }
+        if (cnt == 2)
+            Timer_2_Adjust(100000);
+        else
+            Timer_2_Adjust(1000000);
+        memset(adc_values, 0x0000, sizeof(uint16_t) * (MAX_DATA_NUM + 4));
+        HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // * start ADC
+        while (!conv_done)
+        {
+            
+        }
+        conv_done = false;
+        for (int i = 4; i < MAX_DATA_NUM + 4; ++i)
+        {
+            temp[i - 4] = (float)adc_values[i];
+        }
+
+        sConfig.Channel = ADC_CHANNEL_1;
+        sConfig.Rank = 1;
+        sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+        if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+        {
+            Error_Handler();
+        }
+        if (cnt == 2)
+            Timer_2_Adjust(100000);
+        else
+            Timer_2_Adjust(1000000);
+        memset(adc_values, 0x0000, sizeof(uint16_t) * (MAX_DATA_NUM + 4));
+        HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2); // * start ADC
+        while (!conv_done)
+        {
+            
+        }
+        conv_done = false;
+        for (int i = 4; i < MAX_DATA_NUM + 4; ++i)
+        {
+            temp[i - 4] = (float)adc_values[i];
+        }
+    }
+    
+}
+
 void ADC_Get_Resistance(int channel)
 {
 	float v0, v1;
@@ -245,16 +301,16 @@ void ADC_Get_Resistance(int channel)
             v1 = ADC_Get_Vpp(temp);
 			if (adc_data_owner == INPUT_RESISTANCE)
 			{
-				Ri = 6800.0f / (v0 / v1 - 1.0f);
-				UARTHMI_Send_Float(0, Ri / 1000.0f); //kilo om
+				Ri = R5 / (v0 / v1 - 1.0f);
+				UARTHMI_Send_Float(0, Ri / 1000.0f);
 			}
 			else
 			{
-				Ro = 1500.0f * (v0 / v1 - 1.0f);
+				Ro = R8 * (v0 / v1 - 1.0f);
 				UARTHMI_Send_Float(1, Ro / 1000.0f);
 			}
 		}
-		first = (first == true);
+		first = !first;
 	}while (!first);
 }
 
@@ -292,7 +348,7 @@ float ADC_Get_Gain()
 		}
 		if (first)
         {
-            FFTVpp0 = ADC_Get_Vpp(temp) / 100.0f; //* The input signal is amplified 100 times
+            FFTVpp0 = ADC_Get_Vpp(temp) / ADC1_GAIN;
             // prepare for the other one
 			sConfig.Channel = ADC_CHANNEL_1;
 			sConfig.Rank = 1;
@@ -312,31 +368,101 @@ float ADC_Get_Gain()
 	return Gain;
 }
 
+inline static int Min(int a, int b)
+{
+    return a < b ? a : b;
+}
+
+static float median(float* data, uint8_t len, bool flag)
+{
+    if (len == 0)
+    {
+        return data[0];
+    }
+    float exchange = 0.0f;
+    if (flag)
+    {
+        for (uint8_t i = 0; i < len - 1; ++i)
+        {
+            for (uint8_t j = i + 1; j < len; ++j)
+            {
+                if (data[i] < data[j])
+                {
+                    exchange = data[j];
+                    data[j] = data[i];
+                    data[i] = exchange;
+                }
+            }
+        }
+        if (len % 2)
+        {
+            return (data[len / 2] + data[len / 2 - 1]) / 2;
+        }
+        else
+        {
+            return data[len / 2];
+        }
+    }
+    else
+    {
+        float* room = (float*)malloc(sizeof(float) * len * 2 + 1);
+        for (uint8_t i = 0; i <= len; ++i)
+        {
+            room[len - i] = (data - i)[0];
+            room[len + i] = (data + i)[0];
+        }
+        for (uint8_t i = 0; i < (2 * len); ++i)
+        {
+            for (uint8_t j = i + 1; j < (2 * len + 1); ++j)
+            {
+                if (room[i] < room[j])
+                {
+                    exchange = room[j];
+                    room[j] = room[i];
+                    room[i] = exchange;
+                }
+            }
+        }
+        exchange = room[len];
+        free(room);
+        return exchange;
+    }
+}
+
 static float ADC_Get_Vpp(float* data)
 {
-    if(DDS_Freq < 100000){
+    if(DDS_Freq < 37000){
         float max = data[0];
         float min = data[0];
+        int max_index = 0;
+        int min_index = 0;
         for(int i = 0; i < MAX_DATA_NUM; ++i){
-            if(data[i] > max) max = data[i];
-            if(data[i] < min) min = data[i];
+            if(data[i] > max) {max = data[i];max_index = i;}
+            else if(data[i] < min) {min = data[i];min_index = i;}
         }
-        return (max - min);
+        max = median(data + max_index, Min(Min(max_index, MAX_DATA_NUM - 1 - max_index), MEDIAN_WINDOW), false);
+        min = median(data + min_index, Min(Min(min_index, MAX_DATA_NUM - 1 - min_index), MEDIAN_WINDOW), false);
+        
+        return (max - min) / 4096.0f * 3.3f;
     }
     else
     {
         float cos_theta = cosf(2 * PI * DDS_Freq / 1000000), sin_theta = sinf(2 * PI * DDS_Freq / 1000000);
-        float DC = 0, A = 0;
+        float DC = 0, A = 0, A_median;
+        float* As = (float*)malloc(sizeof(float) * OP / 2);
         for(int i = 0; i < OP; ++i){
-            DC += data[i];
+            DC += data[i] / 4096.0f * 3.3f;
         }
         DC /= OP;
         for (int i = 0; i < OP; i += 2)
         {
-            A += sqrtf(powf((data[i + 1] - DC - cos_theta * (data[i] - DC)) / sin_theta, 2.0f) + (data[i] - DC) * (data[i] - DC));
+            As[i / 2] = sqrtf(powf((data[i + 1] / 4096.0f * 3.3f - DC - cos_theta * (data[i] / 4096.0f * 3.3f - DC)) / sin_theta, 2.0f) + (data[i] / 4096.0f * 3.3f - DC) * (data[i] / 4096.0f * 3.3f - DC));
+            A += As[i / 2];
         }
-        A /= OP;
-        return A * 2;
+        A /= (OP / 2);
+        A_median = median(As, OP / 2, true);
+        free(As);
+        return A_median * 2;// + 
     }
     
 }

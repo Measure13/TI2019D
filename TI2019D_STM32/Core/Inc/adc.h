@@ -54,6 +54,7 @@ extern float Ro;
 void MX_ADC1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+void ADC_Warm_Up(void);
 float ADC_Get_Gain(void);
 void ADC_Get_Resistance(int channel);
 float ADC_Get_DC_Voltage(int channel);
