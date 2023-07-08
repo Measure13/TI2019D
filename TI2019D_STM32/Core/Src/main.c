@@ -67,7 +67,8 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void Find_Faults(void){//Ri为输入电阻，V为直流电压的平均值
-    if(Output_DC > 11.5f  && Ri > 12000.0f)                       {Component = R1; Fault = OPEN_CIRCUIT;} //R1断
+	if(Ri == INF_RI)											{Component = C1; Fault = OPEN_CIRCUIT;} // C1断
+    else if(Output_DC > 11.5f  && Ri > 12000.0f)                       {Component = R1; Fault = OPEN_CIRCUIT;} //R1断
     else if(Output_DC > 11.0f  && Output_DC < 11.5f)              {Component = R1; Fault = SHORT_CIRCUIT;}//R1短
     else if(Output_DC > 3.5f   && Output_DC < 5.0f)               {Component = R2; Fault = OPEN_CIRCUIT;} //R2断
     else if(Output_DC > 11.5f  && Ri < 1000.0f)                   {Component = R2; Fault = SHORT_CIRCUIT;}//R2短
@@ -126,7 +127,7 @@ int main(void)
   //* start
   DDS_Freq = 1000;
   AD9833_Default_Set(DDS_Freq);
-  HAL_Delay(200);
+  HAL_Delay(1000);
 
   float* median_room = (float*)malloc(sizeof(float) * MULTI_WINDOW);
   adc_data_owner = INPUT_RESISTANCE;
@@ -136,8 +137,10 @@ int main(void)
     median_room[i] = Ri;
   }
   Ri = median(median_room, MULTI_WINDOW, true);
-  UARTHMI_Send_Float(0, Ri / 1000.0f);
-  
+  if (!(Ri == INF_RI))
+  {
+	UARTHMI_Send_Float(0, Ri / 1000.0f);
+  }
   adc_data_owner = OUTPUT_RESISTANCE;
   for (uint8_t i = 0; i < MULTI_WINDOW; ++i)
   {

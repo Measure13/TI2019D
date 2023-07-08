@@ -134,7 +134,8 @@ static void UARTHMI_Set_Float(int index, float float_num, uint8_t digits_for_int
 
 void UARTHMI_Send_Float(int index, float float_num)
 {
-    UARTHMI_Set_Float(index, float_num, 1, 2);
+    //UARTHMI_Set_Float(index, float_num, 1, 2);
+    printf("x%d.val=%d\xff\xff\xff", index, (int)(float_num * 100));
 }
 
 void UARTHMI_Set_Text(uint8_t index, uint8_t *char_p)

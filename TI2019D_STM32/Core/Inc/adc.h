@@ -41,6 +41,7 @@ extern ADC_HandleTypeDef hadc1;
 #define INPUT_RESISTANCE  0
 #define OUTPUT_RESISTANCE 1
 #define Amp_Freq_Curv     2
+#define INF_RI            100000.0f //100k
 
 extern uint32_t adc_freq;
 extern uint16_t adc_values[MAX_DATA_NUM + 4];

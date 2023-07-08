@@ -232,7 +232,7 @@ void ADC_Warm_Up(void)
 
 void ADC_Get_Resistance(int channel)
 {
-	float v0, v1;
+	float v0, v1; //volatile 
 	
 	ADC_ChannelConfTypeDef sConfig = {0};
 	sConfig.Channel = channel % 2;
@@ -301,7 +301,15 @@ void ADC_Get_Resistance(int channel)
             v1 = ADC_Get_Vpp(temp);
 			if (adc_data_owner == INPUT_RESISTANCE)
 			{
-				Ri = R5 / (v0 / v1 - 1.0f);
+				float zero_maybe = v0 / v1 - 1.0f;
+				if (zero_maybe < 0.15f && zero_maybe > -0.15f)
+				{
+					Ri = INF_RI;
+				}
+				else
+				{
+					Ri = R5 / zero_maybe;
+				}
 			}
 			else
 			{
