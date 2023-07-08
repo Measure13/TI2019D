@@ -53,7 +53,7 @@ uint32_t DDS_Freq;
 // uint32_t DDS_Freq_Array[] = {200, 206, 213, 220, 227, 234, 242, 250, 258, 266, 275, 283, 292, 302, 312, 322, 332, 343, 354, 365, 377, 389, 401, 414, 428, 441, 456, 470, 485, 501, 517, 534, 551, 569, 587, 606, 625, 646, 666, 688, 710, 733, 756, 781, 806, 832, 858, 886, 915, 944, 974, 1006, 1038, 1072, 1106, 1142, 1178, 1216, 1255, 1296, 1337, 1381, 1425, 1471, 1518, 1567, 1617, 1669, 1723, 1779, 1836, 1895, 1956, 2019, 2084, 2151, 2220, 2291, 2365, 2441, 2520, 2601, 2685, 2771, 2860, 2952, 3047, 3145, 3246, 3351, 3459, 3570, 3685, 3803, 3926, 4052, 4183, 4317, 4456, 4599, 4747, 4900, 5058, 5221, 5389, 5562, 5741, 5926, 6116, 6313, 6516, 6726, 6942, 7166, 7396, 7634, 7880, 8134, 8395, 8665, 8944, 9232, 9529, 9836, 10152, 10479, 10816, 11164, 11523, 11894, 12277, 12672, 13080, 13501, 13935, 14383, 14846, 15324, 15817, 16326, 16851, 17393, 17953, 18531, 19127, 19743, 20378, 21033, 21710, 22409, 23130, 23874, 24642, 25435, 26254, 27098, 27970, 28870, 29799, 30758, 31748, 32770, 33824, 34912, 36036, 37195, 38392, 39628, 40903, 42219, 43577, 44979, 46427, 47921, 49463, 51054, 52697, 54393, 56143, 57949, 59814, 61739, 63725, 65776, 67892, 70077, 72332, 74659, 77061, 79541, 82100, 84742, 87469, 90283, 93189, 96187, 99282, 102477, 105774, 109178, 112691, 116317, 120060, 123923, 127910, 132026, 136274, 140659, 145185, 149857, 154679, 159656, 164793, 170096, 175569, 181219, 187050, 193068, 199281, 205693, 212312, 219143, 226195, 233473, 240986, 248740, 256744, 265005, 273532, 282334, 291418, 300796, 310474, 320465, 330776, 341420, 352406, 363745, 375449, 387530};
 static uint32_t DDS_Freq_Array[] = {100, 103, 107, 110, 114, 117, 121, 125, 129, 133, 137, 142, 146, 151, 156, 161, 166, 171, 177, 183, 188, 194, 201, 207, 214, 221, 228, 235, 243, 251, 259, 267, 276, 284, 294, 303, 313, 323, 333, 344, 355, 366, 378, 390, 403, 416, 429, 443, 457, 472, 487, 503, 519, 536, 553, 571, 589, 608, 628, 648, 669, 690, 712, 735, 759, 783, 809, 835, 862, 889, 918, 947, 978, 1009, 1042, 1075, 1110, 1146, 1183, 1221, 1260, 1300, 1342, 1385, 1430, 1476, 1524, 1573, 1623, 1675, 1729, 1785, 1842, 1902, 1963, 2026, 2091, 2159, 2228, 2300, 2374, 2450, 2529, 2610, 2694, 2781, 2870, 2963, 3058, 3157, 3258, 3363, 3471, 3583, 3698, 3817, 3940, 4067, 4198, 4333, 4472, 4616, 4765, 4918, 5076, 5239, 5408, 5582, 5762, 5947, 6138, 6336, 6540, 6750, 6967, 7192, 7423, 7662, 7908, 8163, 8426, 8697, 8977, 9265, 9564, 9871, 10189, 10517, 10855, 11204, 11565, 11937, 12321, 12718, 13127, 13549, 13985, 14435, 14900, 15379, 15874, 16385, 16912, 17456, 18018, 18598, 19196, 19814, 20451, 21109, 21789, 22490, 23213, 23960, 24731, 25527, 26348, 27196, 28071, 28975, 29907, 30869, 31863, 32888, 33946, 35038, 36166, 37330, 38531, 39771, 41050, 42371, 43734, 45142, 46594, 48094, 49641, 51238, 52887, 54589, 56345, 58158, 60030, 61961, 63955, 66013, 68137, 70330, 72593, 74928, 77339, 79828, 82397, 85048, 87785, 90609, 93525, 96534, 99640, 102847, 106156, 109572, 113097, 116737, 120493, 124370, 128372, 132503, 136766, 141167, 145709, 150398, 155237, 160232, 165388, 170710, 176203, 181873, 187725, 193765};
 float Gain_Array[MAX_SEND_LEN];
-static float A_mf, Output_DC;
+static float A_mf, Output_DC, A_hf, A_lf;
 static int freq_upper = 160000, Component = 0, Fault = 0;
 static bool already = true;
 /* USER CODE END PV */
@@ -67,8 +67,8 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void Find_Faults(void){//Ri为输入电阻，V为直流电压的平均值
-	if(Ri == INF_RI)											{Component = C1; Fault = OPEN_CIRCUIT;} // C1断
-    else if(Output_DC > 11.5f  && Ri > 12000.0f)                       {Component = R1; Fault = OPEN_CIRCUIT;} //R1断
+	if(Output_DC < 8.5f && Ri == INF_RI)						  {Component = C1; Fault = OPEN_CIRCUIT;} // C1断
+    else if(Output_DC > 11.5f  && Ri > 12000.0f)                  {Component = R1; Fault = OPEN_CIRCUIT;} //R1断
     else if(Output_DC > 11.0f  && Output_DC < 11.5f)              {Component = R1; Fault = SHORT_CIRCUIT;}//R1短
     else if(Output_DC > 3.5f   && Output_DC < 5.0f)               {Component = R2; Fault = OPEN_CIRCUIT;} //R2断
     else if(Output_DC > 11.5f  && Ri < 1000.0f)                   {Component = R2; Fault = SHORT_CIRCUIT;}//R2短
@@ -76,12 +76,11 @@ void Find_Faults(void){//Ri为输入电阻，V为直流电压的平均值
     else if(Output_DC > 11.5f  && Ri > 1000.0f && Ri < 3000.0f)   {Component = R3; Fault = SHORT_CIRCUIT;}//R3短
     else if(Output_DC > 11.5f  && Ri > 10000.0f && Ri < 12000.0f) {Component = R4; Fault = OPEN_CIRCUIT;} //R4断
     else if(Output_DC < 0.1f)                                     {Component = R4; Fault = SHORT_CIRCUIT;}//R4短
-    // else if(Ri < 500.0f)                                          {Component = C1; Fault = OPEN_CIRCUIT;}
-    // else if(Ri < 11500.0f && Ri > 8500.0f && A_mf < 140.0f)       {Component = C2; Fault = OPEN_CIRCUIT;}
-    // else if(Ri < 500.0f)                                          {Component = C3; Fault = OPEN_CIRCUIT;}
+    else if(freq_upper < 80000.0f && freq_upper > 70000.0f)       {Component = C3; Fault = TOO_LARGE;}
+    else if(Ri < 13000.0f && Ri > 9500.0f)                        {Component = C2; Fault = OPEN_CIRCUIT;}
+    else if(A_hf > 4.95f)                                         {Component = C3; Fault = OPEN_CIRCUIT;}
     // else if(Ri < 500.0f)                                          {Component = C1; Fault = TOO_LARGE;}
-    // else if(Ri < 500.0f)                                          {Component = C2; Fault = TOO_LARGE;}
-    // else if(Ri < 500.0f)                                          {Component = C3; Fault = TOO_LARGE;}
+    else if(A_lf > 4.45f)                                         {Component = C2; Fault = TOO_LARGE;}
 }
 /* USER CODE END 0 */
 
@@ -122,12 +121,15 @@ int main(void)
 	HAL_TIM_Base_Start_IT(&htim2);
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_values, MAX_DATA_NUM + 4);
   UARTHMI_Forget_It();
+  AD9833_Set_Amplitude(0);
+  HAL_Delay(300);
   ADC_Warm_Up();
+  AD9833_Set_Amplitude(147);
 	
   //* start
   DDS_Freq = 1000;
   AD9833_Default_Set(DDS_Freq);
-  HAL_Delay(1000);
+  HAL_Delay(300);
 
   float* median_room = (float*)malloc(sizeof(float) * MULTI_WINDOW);
   adc_data_owner = INPUT_RESISTANCE;
@@ -175,12 +177,14 @@ int main(void)
     DDS_Freq = DDS_Freq_Array[i];
     AD9833_Default_Set(DDS_Freq);
     Gain_Array[i] = logf(ADC_Get_Gain());
-    if (already && (DDS_Freq > 1000) && (Gain_Array[i] < A_mf - 0.3f))
+    if (already && (DDS_Freq > 60000) && (Gain_Array[i] < A_mf - 0.23f))
     {
       already = false;
       freq_upper = DDS_Freq;
     }
   }
+  A_hf = Gain_Array[MAX_SEND_LEN - 1];
+  A_lf = (Gain_Array[0] + Gain_Array[1] + Gain_Array[2]) / 3;
   UARTHMI_Send_Number(0, freq_upper / 1000);
   UARTHMI_Draw_Curve_addt(0, Gain_Array, MAX_SEND_LEN, 10);
   if (!already)

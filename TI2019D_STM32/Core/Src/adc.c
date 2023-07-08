@@ -302,7 +302,7 @@ void ADC_Get_Resistance(int channel)
 			if (adc_data_owner == INPUT_RESISTANCE)
 			{
 				float zero_maybe = v0 / v1 - 1.0f;
-				if (zero_maybe < 0.15f && zero_maybe > -0.15f)
+				if (zero_maybe < 0.12f && zero_maybe > -0.12f)
 				{
 					Ri = INF_RI;
 				}
